@@ -1,5 +1,5 @@
 /* 收藏檔案 Service Worker — 離線可用 */
-var CACHE = "momo-coll-v7";
+var CACHE = "momo-coll-v8";
 var SHELL = [
   "./",
   "index.html",

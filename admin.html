@@ -1049,6 +1049,12 @@ function openSettings(){
      '<button data-act="backup">💾 下載備份</button>'+
      '<label class="btn" style="flex:1 1 8rem">📥 匯入備份<input type="file" id="f_import" accept=".json,application/json" style="display:none"></label>'+
      '<button class="dan" data-act="wipe">🗑 清空本機</button></div></div>';
+  h+='<div class="panel"><span class="lb">加入藏品（mvmv 交付／由公開站同步）</span>'+
+     '<p class="hint">① 由公開站補回缺少嘅藏品：只加入本機冇嘅 id，唔會覆蓋你改過嘅資料；'+
+     '被你刪除過嘅 id 會記住，唔會復活。<br>② 貼 JSON 加入單件：同 id 覆蓋、新 id 加入。</p>'+
+     '<div class="row" style="margin-top:.4rem">'+
+     '<button data-act="pullmissing">🔄 由公開站補回缺少藏品</button>'+
+     '<button data-act="addone">📥 加入單件（貼 JSON）</button></div></div>';
   h+='<div class="panel warn"><b>解鎖雲端 vault</b><p class="hint">如果你喺另一部機／換電話，可以下載 '+
      '<span class="mono">data/vault.enc.json</span> 再喺呢度解鎖。</p>'+
      '<label class="fld"><span class="lb">vault 檔</span><input type="file" id="f_vault" accept=".json" ></label>'+
@@ -1112,6 +1118,7 @@ document.addEventListener("click",function(e){
   else if(a==="save"){ doSave(); }
   else if(a==="del"){
     if(!confirm("確定刪除？呢個動作唔可以還原。")) return;
+    tombstone(S.editId);
     S.db.items=S.db.items.filter(function(x){return x.id!==S.editId;});
     S.db.meta.updated=today(); saveLocal(); S.view="list"; renderTop(); renderList();
     toast("已刪除");
@@ -1138,6 +1145,8 @@ document.addEventListener("click",function(e){
   }
   else if(a==="clear-tok"){ localStorage.removeItem(LS_TOK); toast("已清除 token"); openSettings(); }
   else if(a==="backup"){ backup(); }
+  else if(a==="pullmissing"){ pullMissing(true); }
+  else if(a==="addone"){ openSingleImport(); }
   else if(a==="wipe"){
     if(!confirm("清空本機資料？雲端 vault 唔會受影響。")) return;
     localStorage.removeItem(LS_DB); S.db={meta:{version:1,updated:today(),densities:[]},items:[]};
@@ -1173,6 +1182,94 @@ function mergeCats(base,extra){
   return out;
 }
 
+
+/* ============ 由公開站補回／單件匯入（mvmv 交付用） ============ */
+function tombstone(id){
+  if(!S.db.meta) S.db.meta={version:1,updated:today(),densities:[]};
+  var t=S.db.meta.deleted_ids||[];
+  if(t.indexOf(id)<0) t.push(id);
+  S.db.meta.deleted_ids=t;
+}
+function mergeItems(payload,opts){
+  opts=opts||{};
+  var arr=[];
+  if(payload&&payload.items) arr=payload.items;
+  else if(Object.prototype.toString.call(payload)==="[object Array]") arr=payload;
+  else if(payload&&payload.id) arr=[payload];
+  var deleted=(S.db.meta&&S.db.meta.deleted_ids)||[];
+  var n=0,skipped=0;
+  arr.forEach(function(inc){
+    if(!inc||!inc.id) return;
+    if(deleted.indexOf(inc.id)>=0){ skipped++; return; }
+    var idx=-1,i;
+    for(i=0;i<S.db.items.length;i++){ if(S.db.items[i].id===inc.id){ idx=i; break; } }
+    if(idx>=0){ if(!opts.overwrite) return; S.db.items[idx]=inc; n++; }
+    else { S.db.items.push(inc); n++; }
+  });
+  if(n){
+    S.db.meta.updated=today();
+    S.db.meta.count=S.db.items.length;
+    if(opts.dirty) S.db.meta.dirty=(S.db.meta.dirty||0)+n;
+    saveLocal(); renderTop(); renderList();
+  }
+  return {n:n,skipped:skipped};
+}
+function pullMissing(interactive){
+  return fetch("data/public.json?cb="+Date.now(),{cache:"no-store"})
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(pub){
+      var res=mergeItems({items:(pub&&pub.items)||[]},{overwrite:false,dirty:false});
+      if(interactive) toast(res.n?("✅ 由公開站補回 "+res.n+" 件"):"公開站冇新藏品（本機已齊）",6000);
+      return res;
+    })
+    .catch(function(e){ if(interactive) toast("讀公開站失敗："+e.message,5000); return {n:0,err:e.message}; });
+}
+function decodeB64Utf8(s){
+  s=s.replace(/-/g,"+").replace(/_/g,"/");
+  while(s.length%4) s+="=";
+  var bin=atob(s), bytes=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+function tryUrlParams(){
+  var q=location.search||"";
+  var mA=q.match(/[?&](?:add|additem)=([^&]+)/);
+  if(mA){
+    try{
+      var res=mergeItems(JSON.parse(decodeB64Utf8(mA[1])),{overwrite:true,dirty:true});
+      try{ history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
+      toast(res.n?("✅ 已加入 "+res.n+" 件 · 記得撳 📤 發佈上線"):"連結內冇有效物件",8000);
+    }catch(err){ toast("匯入連結解碼失敗："+err.message,6000); }
+    return;
+  }
+  if(/[?&]pull=1/.test(q)){
+    try{ history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
+    pullMissing(true);
+  }
+}
+function openSingleImport(){
+  var old=document.getElementById("siWrap"); if(old) old.remove();
+  var d=document.createElement("div");
+  d.id="siWrap";
+  d.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-end;overflow:auto";
+  d.innerHTML='<div style="background:#fff;width:100%;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px">'
+    +'<b style="font-size:20px">📥 加入單件藏品</b>'
+    +'<p style="font-size:15px;margin:6px 0 10px;color:#666">貼上 JSON（一件物件，或 {"items":[...]}）。同 id 會覆蓋，新 id 會加入，其他藏品不受影響。</p>'
+    +'<textarea id="siText" style="width:100%;height:32vh;font-size:15px;font-family:monospace;padding:8px;border:1px solid #ccc;border-radius:10px;box-sizing:border-box"></textarea>'
+    +'<div class="row" style="margin-top:10px">'
+    +'<button id="siCancel" style="flex:1 1 6rem">取消</button>'
+    +'<button id="siOk" style="flex:1 1 6rem">加入</button></div></div>';
+  document.body.appendChild(d);
+  d.querySelector("#siCancel").addEventListener("click",function(){ d.remove(); });
+  d.querySelector("#siOk").addEventListener("click",function(){
+    try{
+      var res=mergeItems(JSON.parse(d.querySelector("#siText").value||"{}"),{overwrite:true,dirty:true});
+      d.remove();
+      toast(res.n?("✅ 已加入／更新 "+res.n+" 件 · 記得撳 📤 發佈上線"):"冇有效物件（要有 id）",6000);
+    }catch(err){ toast("JSON 格式錯："+err.message,5000); }
+  });
+}
+
 function seed(force){
   var local=force?null:loadLocal();
   var jobs=[
@@ -1199,6 +1296,7 @@ function seed(force){
     S.db.categories=S.cats;
     saveLocal();
     renderTop(); renderList();
+    tryUrlParams();
   }).catch(function(e){
     $("app").innerHTML='<div class="panel dan">載入失敗：'+esc(e.message)+
       '<br><span class="hint">要由 https 或 http 開，唔可以用 file://（瀏覽器限制）。</span></div>';
