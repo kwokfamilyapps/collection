@@ -1190,6 +1190,31 @@ function tombstone(id){
   if(t.indexOf(id)<0) t.push(id);
   S.db.meta.deleted_ids=t;
 }
+
+function isBlankVal(v){
+  if(v===undefined||v===null||v==="") return true;
+  if(Object.prototype.toString.call(v)==="[object Array]") return v.length===0;
+  if(typeof v==="object"&&v) return Object.keys(v).length===0;
+  return false;
+}
+function fillEmptyKeys(tgt,inc){
+  var changed=false;
+  Object.keys(inc).forEach(function(k){
+    if(isBlankVal(inc[k])) return;
+    if(k==="spec"||k==="derived"){
+      if(isBlankVal(tgt[k])){ tgt[k]=inc[k]; changed=true; return; }
+      if(tgt[k]&&typeof tgt[k]==="object"){
+        Object.keys(inc[k]).forEach(function(s){
+          if(isBlankVal(inc[k][s])) return;
+          if(isBlankVal(tgt[k][s])){ tgt[k][s]=inc[k][s]; changed=true; }
+        });
+      }
+      return;
+    }
+    if(isBlankVal(tgt[k])){ tgt[k]=inc[k]; changed=true; }
+  });
+  return changed;
+}
 function mergeItems(payload,opts){
   opts=opts||{};
   var arr=[];
@@ -1203,8 +1228,12 @@ function mergeItems(payload,opts){
     if(deleted.indexOf(inc.id)>=0){ skipped++; return; }
     var idx=-1,i;
     for(i=0;i<S.db.items.length;i++){ if(S.db.items[i].id===inc.id){ idx=i; break; } }
-    if(idx>=0){ if(!opts.overwrite) return; S.db.items[idx]=inc; n++; }
-    else { S.db.items.push(inc); n++; }
+    if(idx>=0){
+      if(opts.overwrite){ S.db.items[idx]=inc; n++; }
+      else if(opts.fillEmpty && fillEmptyKeys(S.db.items[idx],inc)) n++;
+      return;
+    }
+    S.db.items.push(inc); n++;
   });
   if(n){
     S.db.meta.updated=today();
@@ -1218,7 +1247,7 @@ function pullMissing(interactive){
   return fetch("data/public.json?cb="+Date.now(),{cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
     .then(function(pub){
-      var res=mergeItems({items:(pub&&pub.items)||[]},{overwrite:false,dirty:false});
+      var res=mergeItems({items:(pub&&pub.items)||[]},{overwrite:false,fillEmpty:true,dirty:false});
       if(interactive) toast(res.n?("✅ 由公開站補回 "+res.n+" 件"):"公開站冇新藏品（本機已齊）",6000);
       return res;
     })

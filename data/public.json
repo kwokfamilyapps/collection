@@ -55,7 +55,10 @@
     "weight_g": 2.9,
     "thickness_mm": 1.0,
     "hole_mm": null,
-    "magnetic": "微磁吸（吊唔住）"
+    "magnetic": "微磁吸（吊唔住）",
+    "inscription": "直百五銖（隸書，直讀「直百」「五銖」；背多無文，少數背「為」＝犍為郡）",
+    "dynasty": "蜀漢（三國）· 建安十九年（214）起",
+    "mint": "蜀漢益州（成都）；背「為」者屬犍為郡"
    },
    "derived": {
     "density": [
@@ -157,7 +160,10 @@
     "weight_g": null,
     "thickness_mm": null,
     "hole_mm": null,
-    "magnetic": "待測"
+    "magnetic": "待測",
+    "inscription": "宣和通寶（多為篆書／隸書對錢，另有真書；背或有陝、宣、廣等記監）",
+    "dynasty": "北宋 · 徽宗 宣和年間（1119–1125）",
+    "mint": "北宋諸路錢監分鑄 —— 具體錢監要睇背面記號，未定"
    },
    "derived": {
     "density": null,
@@ -255,7 +261,10 @@
     "weight_g": 3.5,
     "thickness_mm": 1.0,
     "hole_mm": null,
-    "magnetic": "拒磁"
+    "magnetic": "拒磁",
+    "inscription": "大齊通寶（隸書，直讀）",
+    "dynasty": "南唐 · 李昪（徐知誥）· 公元 937–939 年",
+    "mint": "南唐（具體錢監無確證；真品存世僅 2 枚）"
    },
    "derived": {
     "density": [
@@ -337,7 +346,10 @@
     "weight_g": 3.9,
     "thickness_mm": null,
     "hole_mm": null,
-    "magnetic": "磁石可輕輕連著"
+    "magnetic": "磁石可輕輕連著",
+    "inscription": "端平元寶（楷書，直讀；背面「元」）",
+    "dynasty": "南宋 · 理宗 端平年間（1234–1236）",
+    "mint": "南宋錢監 —— 背「元」一般視為紀年（端平元年），唔係錢監名"
    },
    "derived": {
     "density": null,
@@ -414,7 +426,10 @@
     "weight_g": 3.5,
     "thickness_mm": 1.0,
     "hole_mm": null,
-    "magnetic": "拒磁"
+    "magnetic": "拒磁",
+    "inscription": "待確認（只見「大」字，正面錢文未定）",
+    "dynasty": "待確認",
+    "mint": "待確認"
    },
    "derived": {
     "density": [
@@ -463,7 +478,10 @@
     "weight_g": null,
     "thickness_mm": null,
     "hole_mm": null,
-    "magnetic": "待測"
+    "magnetic": "待測",
+    "inscription": "待確認（需要正面錢文相片）",
+    "dynasty": "待確認",
+    "mint": "待確認"
    },
    "derived": {
     "density": null,
