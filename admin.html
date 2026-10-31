@@ -1224,6 +1224,10 @@ function pullMissing(interactive){
     })
     .catch(function(e){ if(interactive) toast("讀公開站失敗："+e.message,5000); return {n:0,err:e.message}; });
 }
+function autoPull(){
+  /* 靜默補回：公開站有、本機冇嘅藏品（唔覆蓋本機改動；刪過嘅 id 有墓碑唔會復活） */
+  pullMissing(false).then(function(r){ if(r&&r.n) toast("🔄 由公開站補回 "+r.n+" 件新藏品",5000); });
+}
 function decodeB64Utf8(s){
   s=s.replace(/-/g,"+").replace(/_/g,"/");
   while(s.length%4) s+="=";
@@ -1297,6 +1301,7 @@ function seed(force){
     saveLocal();
     renderTop(); renderList();
     tryUrlParams();
+    autoPull();
   }).catch(function(e){
     $("app").innerHTML='<div class="panel dan">載入失敗：'+esc(e.message)+
       '<br><span class="hint">要由 https 或 http 開，唔可以用 file://（瀏覽器限制）。</span></div>';
