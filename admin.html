@@ -660,27 +660,48 @@ function updAuthHint(){
   }
 }
 
+var METALS=[
+  ["純金 99.9%",19.3],["鉛",11.34],["銀 99%",10.49],["銀 90%（銀幣）",10.31],
+  ["銀 85%（半圓成色）",10.23],["純銅",8.96],["白銅／銅鎳",8.9],
+  ["青銅",8.7],["黃銅",8.55],["純鐵／鋼",7.87],["錫",7.3],["鋅",7.14]
+];
+function classifyRho(lo,hi){
+  function near(a,b){ return Math.abs(a-b)<=(b*0.055); }
+  if(lo>=19.0)                       return ["b-replica","密度接近純金 → 唔似流通銀／銅幣"];
+  if(lo>11.6)                        return ["b-replica","密度高過鉛 → 可能鉛質或非金屬（鋅合金假幣常見）"];
+  if(lo<=11.6&&hi>=10.9)             return ["b-replica","密度接近鉛 11.34 → 鉛質私鑄／假幣警號"];
+  if(near((lo+hi)/2,10.23)||(lo>=10.05&&hi<=10.55))
+                                     return ["b-genuine","落銀／銀銅合金範圍 ✓（銀幣成色 80–95%）"];
+  if(lo>=8.3&&hi<=9.05)              return ["b-genuine","落標準銅合金範圍 ✓（青銅／黃銅／白銅）"];
+  if(hi<7.6)                         return ["b-replica","密度低過錫／鋅 → 非金屬、空心或嚴重锈蝕"];
+  if(lo>=7.6&&hi<8.3)                return ["b-pending","接近鐵／錫 → 有可能係鐵錢或低質合金"];
+  return ["b-pending","邊緣範圍，要配合锈色、聲音、邊齒判斷"];
+}
+
 function updDensity(){
   var spec={};
   Array.prototype.forEach.call(document.querySelectorAll("[data-fk]"),function(el){
     spec[el.getAttribute("data-fk")]=el.type==="number"?parseFloat(el.value):el.value;
   });
-  var h1=parseFloat(spec.hole_mm)||4.5, h2=(spec.hole_mm?parseFloat(spec.hole_mm):6.5);
-  if(spec.hole_mm){ h1=parseFloat(spec.hole_mm); h2=h1; }
-  var r=calcDensity(spec.weight_g,spec.diameter_mm,spec.thickness_mm,h1,h2);
   var o=$("densout"); if(!o) return;
-  if(!r){ o.innerHTML="量到直徑／重量／厚度就會自動計"; return; }
-  var lo=r[0],hi=r[1];
-  var cls="",txt="";
-  if(hi<7.87){ cls="b-replica"; txt="密度低過純鐵 7.87 → 可能係锈蝕鐵錢或非金屬"; }
-  else if(lo>10.5){ cls="b-replica"; txt="密度高過青銅太多 → 可能含鉛量極高或非銅質"; }
-  else if(lo>=8.4&&hi<=9.0){ cls="b-genuine"; txt="落標準青銅／黃銅範圍 ✓"; }
-  else { cls="b-pending"; txt="邊緣範圍，要配合锈色同聲音判斷"; }
-  o.innerHTML='<b style="font-size:1.05rem">'+lo.toFixed(2)+" – "+hi.toFixed(2)+" g/cm³</b>"+
-    (spec.hole_mm?' <span class="hint" style="display:inline">（穿徑 '+spec.hole_mm+' mm）</span>':
-      ' <span class="hint" style="display:inline">（穿徑未量 → 用 4.5–6.5 mm 範圍）</span>')+
-    '<br><span class="badge '+cls+'">'+esc(txt)+"</span>"+
-    '<br><span class="hint">對照：青銅 8.5–8.9 · 黃銅 8.4–8.7 · 純銅 8.96 · 純鐵 7.87 · 鉛 11.34</span>';
+  var m=parseFloat(spec.weight_g), d=parseFloat(spec.diameter_mm), t=parseFloat(spec.thickness_mm);
+  if(!m||!d||!t){ o.innerHTML="量到直徑／重量／厚度就會自動計"; return; }
+  /* ① 無穿孔（銀幣／機制幣／鎳幣） */
+  var vFull=Math.PI*Math.pow(d/2,2)*t/1000;
+  var rhoFull=m/vFull;
+  /* ② 方孔銅錢（有穿徑就精確，冇就用 4.5–6.5mm 範圍） */
+  var h1=parseFloat(spec.hole_mm)||4.5, h2=(spec.hole_mm?parseFloat(spec.hole_mm):6.5);
+  var v1=vFull-h1*h1*t/1000, v2=vFull-h2*h2*t/1000;
+  var r1=m/v1, r2=m/v2, lo=Math.min(r1,r2), hi=Math.max(r1,r2);
+  var noHole=classifyRho(rhoFull,rhoFull);
+  var withHole=classifyRho(lo,hi);
+  o.innerHTML=
+    '<b style="font-size:1.05rem">無穿孔：'+rhoFull.toFixed(2)+" g/cm³</b>"+
+      ' <span class="badge '+noHole[0]+'">'+esc(noHole[1])+"</span><br>"+
+    '<b style="font-size:1.05rem">方孔 '+h1+(h2!==h1?"–"+h2:"")+" mm："+lo.toFixed(2)+" – "+hi.toFixed(2)+" g/cm³</b>"+
+      ' <span class="badge '+withHole[0]+'">'+esc(withHole[1])+"</span><br>"+
+    '<span class="hint">銀幣／機制幣睇上一行；方孔銅錢睇下一行。</span>'+
+    '<br><span class="hint">對照：'+METALS.map(function(x){return x[0]+" "+x[1];}).join(" · ")+"</span>";
 }
 
 function renderThumbs(){
