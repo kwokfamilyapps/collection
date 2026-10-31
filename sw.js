@@ -1,5 +1,5 @@
 /* 收藏檔案 Service Worker — 離線可用 */
-var CACHE = "momo-coll-v1";
+var CACHE = "momo-coll-v3";
 var SHELL = [
   "./",
   "index.html",
@@ -56,7 +56,23 @@ self.addEventListener("fetch", function (e) {
     return;
   }
 
-  /* 其他：先 cache，後網絡（相片／HTML／icon） */
+  /* HTML：先網絡（確保更新即刻見到），失敗才用 cache */
+  if (url.pathname.endsWith(".html") || url.pathname.endsWith("/")) {
+    e.respondWith(
+      fetch(req).then(function (r) {
+        var cp = r.clone();
+        caches.open(CACHE).then(function (c) { c.put(req, cp); });
+        return r;
+      }).catch(function () {
+        return caches.match(req).then(function (m) {
+          return m || caches.match("index.html");
+        });
+      })
+    );
+    return;
+  }
+
+  /* 其他：先 cache，後網絡（相片／icon） */
   e.respondWith(
     caches.match(req).then(function (m) {
       if (m) return m;

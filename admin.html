@@ -111,7 +111,7 @@ var PUBLIC_FIELDS=["id","category","name","name_en","era","year","issuer","authe
 var PRIVATE_FIELDS=["notes_private","purchase_price","acquired_from","location",
   "serial_no","valuation_private"];
 
-var S={db:null,schema:null,view:"list",editId:null,dirty:false,unlocked:false};
+var S={db:null,schema:null,cats:[],view:"list",editId:null,dirty:false,unlocked:false};
 
 /* ============ 小工具 ============ */
 function $(id){return document.getElementById(id);}
@@ -128,9 +128,10 @@ function toast(msg,ms){
   document.body.appendChild(d);
   setTimeout(function(){d.remove();},ms||2600);
 }
-function catOf(k){ if(!S.schema) return {zh:k,emoji:"•",auth_ok:["genuine","pending"],auth_bad:["replica"],fields:[]};
-  for(var i=0;i<S.schema.categories.length;i++) if(S.schema.categories[i].key===k) return S.schema.categories[i];
-  return {zh:k,emoji:"•",auth_ok:["genuine","pending"],auth_bad:["replica"],fields:[]};}
+function catOf(k){ var d={zh:k,emoji:"•",auth_ok:["genuine","pending"],
+    auth_bad:["replica"],fields:[]};
+  for(var i=0;i<S.cats.length;i++) if(S.cats[i].key===k) return S.cats[i];
+  return d;}
 function authLabel(k){ if(!S.schema) return k;
   for(var i=0;i<S.schema.authenticity.length;i++) if(S.schema.authenticity[i].key===k) return S.schema.authenticity[i].zh;
   return k;}
@@ -150,6 +151,179 @@ function calcDensity(weight_g,d_mm,t_mm,h1,h2){
   var v1=Math.PI/4*(D*D-h1*h1)*t, v2=Math.PI/4*(D*D-h2*h2)*t;
   var a=weight_g/Math.max(v1,v2), b=weight_g/Math.min(v1,v2);
   return [Math.round(a*100)/100,Math.round(b*100)/100];
+}
+
+/* ============ 動態分類引擎 ============ */
+/* 欄位中文名 → 穩定 key（冇對應就自動 gen） */
+var ZH2KEY={"重量":"weight_g","尺寸":"size_cm","產地":"locality","產區":"locality",
+  "材質":"material","年份":"year_make","狀態":"condition","編號":"ref_no","香味":"scent",
+  "顏色":"color","珠徑":"bead_mm","珠數":"bead_count","等級":"grade_note","處理":"treatment",
+  "作者":"maker","款識":"mark","窯口":"kiln","釉色":"glaze","品種":"variety",
+  "油脂線":"oil_line","結油度":"resin_level","總重":"total_g","配珠":"spacer",
+  "直徑":"diameter_mm","厚薄":"thickness_mm","硬度":"mohs","晶系":"crystal",
+  "評級":"grade_note","版別":"issue_type","齒孔":"perf","水印":"watermark",
+  "面額":"denom","冠字號碼":"serial","機芯":"movement","錶徑":"case_mm"};
+
+/* 名稱關鍵詞 → 預設欄位模板 */
+var CAT_TEMPLATES=[
+ {re:/(沉香|棋楠|奇楠|檀香|降真|香材|香料|老山|線香|香粉)/,emoji:"🪵",
+  fields:[["產地／產區",""],["品種",""],["結油度",""],["密度（沉水／半沉／浮水）",""],
+          ["香味",""],["油脂線",""],["重量","g"],["尺寸","cm"],["年份",""]]},
+ {re:/(手串|念珠|佛珠|珠鏈|串珠|手鏈|手鏈|手鐲|手環|珠寶)/,emoji:"📿",
+  fields:[["主珠材質",""],["珠徑","mm"],["珠數",""],["配珠／隔珠",""],["總重","g"],["產地",""]]},
+ {re:/(玉|翡翠|和田|瑪瑙|琥珀|蜜蠟|水晶|寶石)/,emoji:"💠",
+  fields:[["玉種／寶石種",""],["等級／種水",""],["顏色",""],["尺寸","cm"],["重量","g"],
+          ["產地",""],["雕工",""]]},
+ {re:/(瓷|陶|紫砂|釉|窯)/,emoji:"🏺",
+  fields:[["窯口",""],["年代",""],["釉色",""],["尺寸","cm"],["款識",""],["底足",""]]},
+ {re:/(書|畫|字|卷|扇|拓)/,emoji:"🖼",
+  fields:[["作者",""],["題材",""],["尺寸","cm"],["裝裱",""],["款識",""],["印章",""]]},
+ {re:/(刀|劍|兵|刃)/,emoji:"⚔️",
+  fields:[["類型",""],["刃長","cm"],["總長","cm"],["鋼材",""],["產地",""],["年份",""]]},
+ {re:/(壺|杯|茶具|器皿|擺件|雕|木雕|石雕)/,emoji:"🫖",
+  fields:[["材質",""],["尺寸","cm"],["重量","g"],["作者／工藝",""],["年代",""],["產地",""]]},
+ {re:/(相機|鏡頭|音響|樂器|收音機|錶|鐘)/,emoji:"📻",
+  fields:[["品牌",""],["型號",""],["年份",""],["機身編號",""],["狀態",""],["配件",""]]},
+ {re:/(酒|茶|普洱|威士忌|茅台)/,emoji:"🍶",
+  fields:[["品牌",""],["年份",""],["容量","ml"],["產地",""],["狀態／封膜",""],["批次",""]]},
+ {re:/(化石|骨|牙|腳印)/,emoji:"🦴",
+  fields:[["物種",""],["地質年代",""],["產地",""],["地層",""],["尺寸","cm"],["修復程度",""],["處理",""]]},
+ {re:/(礦|石|晶|隕)/,emoji:"💎",
+  fields:[["礦物種",""],["晶系",""],["硬度",""],["產地",""],["尺寸","cm"],["重量","g"],["處理",""]]}
+];
+
+var GENERIC_FIELDS=[["材質",""],["尺寸","cm"],["重量","g"],["產地",""],["年份",""],["狀態",""],["編號",""]];
+
+function fieldKey(zh,used){
+  var k=ZH2KEY[zh];
+  if(!k){ k="f_"+zh.replace(/[^\u4e00-\u9fa5A-Za-z0-9]/g,"").slice(0,6); }
+  if(!k) k="f";
+  var base=k,n=2;
+  while(used[k]){ k=base+"_"+n; n++; }
+  used[k]=1;
+  return k;
+}
+function guessTemplate(name){
+  for(var i=0;i<CAT_TEMPLATES.length;i++)
+    if(CAT_TEMPLATES[i].re.test(name||"")) return CAT_TEMPLATES[i];
+  return {emoji:"📦",fields:GENERIC_FIELDS};
+}
+function makeCategory(name,emoji,fieldPairs){
+  var used={}, fields=[];
+  (fieldPairs||[]).forEach(function(p){
+    var zh=p[0], u=p[1]||"";
+    if(!zh) return;
+    var num=/^(mm|cm|g|ml|kg)$/.test(u);
+    fields.push({k:fieldKey(zh,used),zh:zh,u:u,t:num?"num":"text"});
+  });
+  var base=name.replace(/[^\u4e00-\u9fa5A-Za-z0-9]/g,"");
+  var key="c_"+base+"_"+Math.random().toString(36).slice(2,5);
+  return {key:key,zh:name,emoji:emoji||"📦",custom:true,
+    auth_ok:["genuine","pending"],auth_bad:["replica"],fields:fields};
+}
+function catExists(name){
+  for(var i=0;i<S.cats.length;i++){
+    if(S.cats[i].zh===name || S.cats[i].key===name) return S.cats[i];
+  }
+  return null;
+}
+/* 自動加入分類（搵到就回傳，搵唔到就建立） */
+function ensureCategory(name,emoji,fieldPairs){
+  if(!name) return null;
+  var hit=catExists(name);
+  if(hit) return {cat:hit,created:false};
+  var t=guessTemplate(name);
+  var cat=makeCategory(name,emoji||t.emoji,fieldPairs||t.fields);
+  S.cats.push(cat);
+  S.db.categories=S.cats;
+  return {cat:cat,created:true};
+}
+function itemCountOf(catKey){
+  return (S.db.items||[]).filter(function(i){return i.category===catKey;}).length;
+}
+
+/* ---------- 新增分類對話框（iPhone 冇 prompt()，全部自製） ---------- */
+function openNewCatDialog(cb){
+  var div=document.createElement("div");
+  div.id="newcatmodal";
+  div.style.cssText="position:fixed;inset:0;z-index:120;background:rgba(26,26,22,.6);"+
+    "display:flex;align-items:flex-start;justify-content:center;overflow:auto;padding:1rem .6rem";
+  div.innerHTML='<div style="background:#f0e8d8;border-radius:.6rem;max-width:24rem;width:100%;'+
+    'padding:.9rem .8rem;margin-bottom:2rem">'+
+    '<h2 style="margin-top:0">＋ 新增分類</h2>'+
+    '<div class="panel">'+
+      '<label class="fld"><span class="lb">分類名稱</span>'+
+      '<input id="nc_name" placeholder="例：沉香、手串、印章、鼻煙壺…" autocomplete="off"></label>'+
+      '<label class="fld"><span class="lb">圖示（可留空 → 自動揀）</span>'+
+      '<input id="nc_emoji" placeholder="例：🪵" maxlength="4" autocomplete="off"></label>'+
+      '<p class="hint" id="nc_guess">打個名，就會自動建議欄位。</p>'+
+    '</div>'+
+    '<h3>欄位（自動建議，可以加／刪）</h3>'+
+    '<div id="nc_fields"></div>'+
+    '<div class="row" style="margin:.4rem 0 0"><input class="grow" id="nc_fzh" placeholder="欄位名，例：結油度" autocomplete="off">'+
+    '<input id="nc_fu" placeholder="單位" style="max-width:4.6rem" autocomplete="off">'+
+    '<button type="button" data-nc="addf">＋ 加</button></div>'+
+    '<div class="row" style="margin-top:1rem">'+
+      '<button type="button" class="pri grow" data-nc="ok">建立並選用</button>'+
+      '<button type="button" data-nc="cancel">取消</button></div>'+
+    "</div>";
+  document.body.appendChild(div);
+
+  var ncFields=[], touched=false;
+
+  function drawFields(){
+    var box=div.querySelector("#nc_fields");
+    if(!ncFields.length){ box.innerHTML='<p class="hint">未有欄位（可以直接建立，之後再加）</p>'; return; }
+    box.innerHTML=ncFields.map(function(f,i){
+      return '<div class="row" style="margin-bottom:.25rem">'+
+        '<span class="grow" style="font-size:.86rem;line-height:1.9">'+esc(f.zh)+
+        (f.u?' <span class="hint" style="display:inline">('+esc(f.u)+")</span>":"")+"</span>"+
+        '<button type="button" class="dan" data-del="'+i+'">刪</button></div>';
+    }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll("[data-del]"),function(b){
+      b.addEventListener("click",function(){
+        ncFields.splice(parseInt(this.getAttribute("data-del"),10),1);
+        touched=true; drawFields();
+      });
+    });
+  }
+
+  function guess(){
+    if(touched) return;
+    var nm=div.querySelector("#nc_name").value.trim();
+    var t=guessTemplate(nm);
+    ncFields=t.fields.map(function(p){return {zh:p[0],u:p[1]||""};});
+    var em=div.querySelector("#nc_emoji");
+    if(!em.value.trim()) em.placeholder="建議："+(t.emoji||"📦");
+    div.querySelector("#nc_guess").innerHTML= nm
+      ? "偵測到「"+esc(nm)+"」→ 自動建議 <b>"+ncFields.length+"</b> 個欄位，圖示建議 <b>"+(t.emoji||"📦")+"</b>"
+      : "打個名，就會自動建議欄位。";
+    drawFields();
+  }
+
+  div.querySelector("#nc_name").addEventListener("input",guess);
+  div.querySelector('[data-nc="addf"]').addEventListener("click",function(){
+    var zh=div.querySelector("#nc_fzh").value.trim();
+    if(!zh) return;
+    ncFields.push({zh:zh,u:div.querySelector("#nc_fu").value.trim()});
+    div.querySelector("#nc_fzh").value=""; div.querySelector("#nc_fu").value="";
+    touched=true; drawFields();
+  });
+  div.querySelector('[data-nc="cancel"]').addEventListener("click",function(){ div.remove(); });
+  div.querySelector('[data-nc="ok"]').addEventListener("click",function(){
+    var name=div.querySelector("#nc_name").value.trim();
+    if(!name){ toast("請打分類名"); return; }
+    var res=ensureCategory(name,div.querySelector("#nc_emoji").value.trim(),
+      ncFields.map(function(f){return [f.zh,f.u];}));
+    S.db.meta.updated=today();
+    saveLocal();
+    div.remove();
+    toast((res.created?"✅ 已新增分類「":"已使用現有分類「")+res.cat.zh+"」");
+    if(cb) cb(res.cat);
+  });
+
+  guess();
+  div.querySelector("#nc_name").focus();
 }
 
 /* ============ 儲存 ============ */
@@ -195,6 +369,16 @@ function decryptVault(pw,blob){
 }
 
 /* ============ 匯出公開資料（閘門） ============ */
+function buildSchemaDoc(){
+  var auth=(S.schema&&S.schema.authenticity)||[
+    {key:"genuine",zh:"真品（目視可確認）",public:true},
+    {key:"pending",zh:"待確認（需額外認證）",public:true},
+    {key:"replica",zh:"仿真／假貨（私人參考）",public:false},
+    {key:"natural",zh:"天然未處理",public:true},
+    {key:"treated",zh:"有處理（會註明方式）",public:true},
+    {key:"composite",zh:"拼接／人造（私人參考）",public:false}];
+  return {categories:S.cats,authenticity:auth,private_fields:PRIVATE_FIELDS};
+}
 function buildPublic(){
   var out=[], dropped=[];
   S.db.items.forEach(function(it){
@@ -271,6 +455,7 @@ function renderTop(){
     " · 更新 "+esc(S.db.meta.updated||"—");
   var tok=ghToken();
   var b='<button class="pri" data-act="add">＋ 新增物件</button>'+
+    '<button data-act="newcat">🏷 新分類</button>'+
     '<button data-act="pub-preview">👁 公開預覽</button>'+
     '<button data-act="publish">📤 發佈上線</button>'+
     '<button data-act="backup">💾 備份</button>'+
@@ -328,11 +513,13 @@ function renderEdit(it){
   var h='<span class="back" data-act="cancel">← 取消</span>';
   h+="<h2>"+(isNew?"新增物件":"編輯 · "+esc(it.name||it.id))+"</h2>";
 
-  /* 分類 */
-  h+='<label class="fld"><span class="lb">分類</span><select id="f_cat">';
-  (S.schema?S.schema.categories:[]).forEach(function(x){
-    h+='<option value="'+x.key+'"'+(x.key===it.category?" selected":"")+">"+x.emoji+" "+esc(x.zh)+"</option>";
+  /* 分類 —— 支援即場新增 */
+  h+='<label class="fld"><span class="lb">分類（清單冇你想要嘅？揀「＋ 新增分類」即場加入）</span><select id="f_cat">';
+  S.cats.forEach(function(x){
+    h+='<option value="'+esc(x.key)+'"'+(x.key===it.category?" selected":"")+">"+x.emoji+" "+esc(x.zh)+
+      (x.custom?" ◦":"" )+"</option>";
   });
+  h+='<option value="__new__">＋ 新增分類…</option>';
   h+="</select></label>";
 
   /* 名稱 */
@@ -416,6 +603,19 @@ function renderEdit(it){
   /* 事件 */
   $("f_photo").addEventListener("change",onPhotos);
   $("f_cat").addEventListener("change",function(){
+    var sel=this;
+    if(sel.value==="__new__"){
+      sel.value=it.category;                       /* 先還原，避免 collectItem 收到 __new__ */
+      var cur0=collectItem(S.editId);
+      curPhotos=(cur0.photos||[]).slice();
+      S.editId=cur0.id;
+      openNewCatDialog(function(ncat){
+        cur0.category=ncat.key;
+        renderEdit(cur0);
+        toast("已選用分類「"+ncat.zh+"」");
+      });
+      return;
+    }
     var cur=collectItem(S.editId);   /* 收集現有輸入，只換分類 */
     curPhotos=(cur.photos||[]).slice();
     S.editId=cur.id;
@@ -545,6 +745,11 @@ function collectItem(keepId){
 function doSave(){
   var it=collectItem();
   if(!it.name){ toast("請填名稱"); return; }
+  /* 自動加入分類：儲存時發現分類唔在清單，即刻建立 */
+  if(!it.category||it.category==="__new__"||!catExists(it.category)){
+    var mk=ensureCategory(it.category&&it.category!=="__new__"?it.category:(S.cats[0]?S.cats[0].zh:"其他"));
+    if(mk){ it.category=mk.cat.key; if(mk.created) toast("自動新增分類「"+mk.cat.zh+"」"); }
+  }
   var idx=-1;
   for(var i=0;i<S.db.items.length;i++) if(S.db.items[i].id===it.id) idx=i;
   if(idx>=0){
@@ -611,6 +816,7 @@ function openPublish(){
     var r=buildPublic();
     h+='<div class="panel ok"><b>將會上載：</b><br>'+
       "· <span class='mono'>data/public.json</span> — "+r.doc.items.length+" 件公開<br>"+
+      "· <span class='mono'>data/schema.json</span> — "+S.cats.length+" 個分類（含自訂分類）<br>"+
       "· <span class='mono'>data/vault.enc.json</span> — "+S.db.items.length+" 件完整加密備份<br>"+
       "· <span class='mono'>photos/</span> — 新相片</div>";
     h+='<div class="panel"><label class="fld"><span class="lb">Vault 密碼（加密完整資料庫）</span>'+
@@ -683,6 +889,16 @@ function publishAll(pw){
       if(!res.ok) throw new Error("public.json 上載失敗 ("+res.status+") "+(res.data.message||""));
     });
   }).then(function(){
+    /* 分類定義（自訂分類要一齊上去，公開頁才知道新分類叫咩） */
+    var sd=buildSchemaDoc();
+    var s64=btoa(unescape(encodeURIComponent(JSON.stringify(sd,null,1))));
+    step("上載 data/schema.json（"+sd.categories.length+" 個分類）…");
+    return getSha("data/schema.json").then(function(sha){
+      return putFile("data/schema.json",s64,"schema: "+sd.categories.length+" categories",sha);
+    }).then(function(res){
+      if(!res.ok) throw new Error("schema.json 上載失敗 ("+res.status+") "+(res.data.message||""));
+    });
+  }).then(function(){
     step("加密 vault …");
     return encryptVault(pw,db);
   }).then(function(blob){
@@ -714,6 +930,22 @@ function publishAll(pw){
 function openSettings(){
   var it=S.db.items.length;
   var h='<span class="back" data-act="cancel">← 返回</span><h2>⚙️ 設定</h2>';
+
+  /* 分類管理 */
+  h+='<h3>🏷 分類清單（'+S.cats.length+' 個）</h3><div class="panel">';
+  S.cats.forEach(function(c){
+    var n=itemCountOf(c.key);
+    h+='<div class="row" style="margin-bottom:.25rem">'+
+      '<span class="grow" style="font-size:.86rem;line-height:1.9">'+c.emoji+" "+esc(c.zh)+
+      ' <span class="hint" style="display:inline">'+n+" 件 · "+c.fields.length+" 欄位"+
+      (c.custom?" · 自訂":"")+"</span></span>"+
+      (c.custom&&n===0?'<button class="dan" data-delcat="'+esc(c.key)+'">刪</button>':"")+
+      "</div>";
+  });
+  h+='<button class="pri" data-act="newcat" style="margin-top:.5rem">＋ 新增分類</button>'+
+     '<p class="hint">清單冇你想要嘅？新增分類後，公開頁同管理台都會即刻識得佢。'+
+     '有物件嘅分類唔可以刪。</p></div>';
+
   h+='<div class="panel"><span class="lb">GitHub Repo</span>'+
      '<div class="mono">'+esc(ghRepo())+"</div>"+
      '<div class="row" style="margin-top:.4rem"><input class="grow" id="f_repo" value="'+esc(ghRepo())+'" placeholder="owner/repo">'+
@@ -737,6 +969,16 @@ function openSettings(){
   $("app").innerHTML=h;
   S.view="settings";
   $("f_import").addEventListener("change",doImport);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-delcat]"),function(b){
+    b.addEventListener("click",function(){
+      var k=this.getAttribute("data-delcat");
+      if(itemCountOf(k)>0){ toast("呢個分類仲有物件，唔可以刪"); return; }
+      if(!confirm("刪除分類？")) return;
+      S.cats=S.cats.filter(function(c){return c.key!==k;});
+      S.db.categories=S.cats;
+      saveLocal(); openSettings(); toast("已刪除分類");
+    });
+  });
 }
 
 function doImport(e){
@@ -769,6 +1011,13 @@ document.addEventListener("click",function(e){
   if(!el) return;
   var a=el.getAttribute("data-act");
   if(a==="add"){ curPhotos=[]; openEdit(null); }
+  else if(a==="newcat"){
+    var back=S.view;
+    openNewCatDialog(function(c){
+      renderTop();
+      if(back==="settings") openSettings(); else renderList();
+    });
+  }
   else if(a==="cancel"){ S.view="list"; renderTop(); renderList(); }
   else if(a==="save"){ doSave(); }
   else if(a==="del"){
@@ -822,35 +1071,47 @@ document.addEventListener("click",function(e){
 });
 
 /* ---------- 啟動 ---------- */
+function mergeCats(base,extra){
+  var out=[], seen={};
+  (base||[]).forEach(function(c){ if(!seen[c.key]){ seen[c.key]=1; out.push(c); } });
+  (extra||[]).forEach(function(c){
+    if(seen[c.key]){
+      for(var i=0;i<out.length;i++) if(out[i].key===c.key) out[i]=c;
+    } else { seen[c.key]=1; out.push(c); }
+  });
+  return out;
+}
+
 function seed(force){
   var local=force?null:loadLocal();
-  if(local && local.items && local.items.length){
-    S.db=local;
-    if(!S.db.meta) S.db.meta={version:1,updated:today(),densities:[]};
-    finishBoot();
-    return;
-  }
-  Promise.all([
-    fetch("data/public.json",{cache:"no-cache"}).then(function(r){return r.json();}),
+  var jobs=[
+    fetch("data/public.json",{cache:"no-cache"}).then(function(r){return r.json();}).catch(function(){return null;}),
     fetch("data/schema.json",{cache:"no-cache"}).then(function(r){return r.json();}).catch(function(){return null;})
-  ]).then(function(res){
-    var pub=res[0]; S.schema=res[1];
-    S.db={meta:{version:1,updated:(pub.meta&&pub.meta.updated)||today(),
-      densities:(pub.meta&&pub.meta.densities)||[]},items:pub.items||[]};
+  ];
+  Promise.all(jobs).then(function(res){
+    var pub=res[0], sch=res[1];
+    S.schema=sch||{authenticity:null,categories:[]};
+    var baseCats=(sch&&sch.categories)?sch.categories.slice():[];
+    var baseDens=(pub&&pub.meta&&pub.meta.densities)||[];
+
+    if(local && local.items && local.items.length){
+      S.db=local;
+      if(!S.db.meta) S.db.meta={version:1,updated:today(),densities:baseDens};
+      if(!S.db.meta.densities||!S.db.meta.densities.length) S.db.meta.densities=baseDens;
+      /* 分類合併：檔案嘅基礎分類 + 本機新增嘅自訂分類 */
+      S.cats=mergeCats(baseCats,S.db.categories||[]);
+    } else {
+      S.db={meta:{version:1,updated:(pub&&pub.meta&&pub.meta.updated)||today(),
+        densities:baseDens},items:(pub&&pub.items)||[],categories:baseCats};
+      S.cats=baseCats.slice();
+    }
+    S.db.categories=S.cats;
     saveLocal();
-    finishBoot();
+    renderTop(); renderList();
   }).catch(function(e){
     $("app").innerHTML='<div class="panel dan">載入失敗：'+esc(e.message)+
       '<br><span class="hint">要由 https 或 http 開，唔可以用 file://（瀏覽器限制）。</span></div>';
   });
-}
-
-function finishBoot(){
-  if(!S.schema){
-    fetch("data/schema.json",{cache:"no-cache"}).then(function(r){return r.json();})
-      .then(function(s){ S.schema=s; renderTop(); renderList(); })
-      .catch(function(){ renderTop(); renderList(); });
-  } else { renderTop(); renderList(); }
 }
 
 seed(false);

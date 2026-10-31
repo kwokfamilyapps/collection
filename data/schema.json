@@ -356,6 +356,126 @@
      "t": "text"
     }
    ]
+  },
+  {
+   "key": "c_沉香_x1",
+   "zh": "沉香",
+   "emoji": "🪵",
+   "custom": true,
+   "auth_ok": [
+    "genuine",
+    "pending"
+   ],
+   "auth_bad": [
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "locality",
+     "zh": "產地／產區",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "variety",
+     "zh": "品種",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "resin_level",
+     "zh": "結油度",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "density_note",
+     "zh": "密度（沉水／半沉／浮水）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "scent",
+     "zh": "香味",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "oil_line",
+     "zh": "油脂線",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "weight_g",
+     "zh": "重量",
+     "u": "g",
+     "t": "num"
+    },
+    {
+     "k": "size_cm",
+     "zh": "尺寸",
+     "u": "cm",
+     "t": "num"
+    },
+    {
+     "k": "year_make",
+     "zh": "年份",
+     "u": "",
+     "t": "text"
+    }
+   ]
+  },
+  {
+   "key": "c_手串_x2",
+   "zh": "手串",
+   "emoji": "📿",
+   "custom": true,
+   "auth_ok": [
+    "genuine",
+    "pending"
+   ],
+   "auth_bad": [
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "material",
+     "zh": "主珠材質",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "bead_mm",
+     "zh": "珠徑",
+     "u": "mm",
+     "t": "num"
+    },
+    {
+     "k": "bead_count",
+     "zh": "珠數",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "spacer",
+     "zh": "配珠／隔珠",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "total_g",
+     "zh": "總重",
+     "u": "g",
+     "t": "num"
+    },
+    {
+     "k": "locality",
+     "zh": "產地",
+     "u": "",
+     "t": "text"
+    }
+   ]
   }
  ],
  "authenticity": [

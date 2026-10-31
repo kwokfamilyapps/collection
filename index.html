@@ -234,13 +234,29 @@ function renderItem(id){
   h+="<div>"+badge(it.authenticity)+(it.grade?' <span class="badge b-pending" style="background:#efe4cc;color:#4a3f2c;border-color:#d8c9a8">'+esc(it.grade)+"</span>":"")+"</div>";
 
   var s=it.spec||{};
-  var rows=[];
-  if(s.diameter_mm) rows.push(["直徑",s.diameter_mm+" mm"]);
-  if(s.weight_g) rows.push(["重量",s.weight_g+" g"]);
-  if(s.thickness_mm) rows.push(["厚度",s.thickness_mm+" mm"]);
-  if(s.hole_mm) rows.push(["穿徑（方孔）",s.hole_mm+" mm"]);
-  else if(it.category==="coin") rows.push(["穿徑（方孔）","未量 · 密度計算用 4.5–6.5 mm"]);
-  if(s.magnetic) rows.push(["磁性",esc(s.magnetic)]);
+  var rows=[], seenK={};
+  var cat=catInfo(it.category);
+  /* 用分類自己嘅欄位定義去排（自訂分類都自動適用） */
+  (cat.fields||[]).forEach(function(f){
+    var v=s[f.k];
+    if(v===undefined||v===null||v==="") return;
+    seenK[f.k]=1;
+    var label=esc(f.zh)+(f.u?"（"+esc(f.u)+"）":"");
+    var val=esc(v)+(f.u?" "+esc(f.u):"");
+    rows.push([label,val]);
+  });
+  /* 未在 schema 定義嘅規格都照出，唔會漏 */
+  Object.keys(s).forEach(function(k){
+    if(seenK[k]) return;
+    var v=s[k];
+    if(v===undefined||v===null||v==="") return;
+    var fdef=null;
+    (cat.fields||[]).forEach(function(f){ if(f.k===k) fdef=f; });
+    rows.push([esc(fdef?fdef.zh:k), esc(v)+(fdef&&fdef.u?" "+esc(fdef.u):"")]);
+  });
+  /* 錢幣穿徑未量時提示 */
+  if(it.category==="coin"&&!s.hole_mm)
+    rows.push(["穿徑（方孔）","未量 · 密度計算用 4.5–6.5 mm"]);
   if(rows.length){
     h+="<h3>規格</h3>";
     rows.forEach(function(r){h+='<div class="kv"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+"</span></div>";});
