@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>收藏檔案 · 無虛</title>
+<meta name="description" content="私人藏品數碼目錄：錢幣、紙幣、郵票、手錶、化石、礦石。只收錄目視可確認真品及待確認物件。">
+<meta name="theme-color" content="#f0e8d8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+html{font-size:32px}
+*{box-sizing:border-box}
+body{
+  margin:0;background:#f0e8d8;color:#1a1a16;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang HK","Noto Sans CJK HK",sans-serif;
+  font-size:1rem;line-height:2.0;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:26rem;margin:0 auto;padding:.9rem .8rem 3rem}
+h1,h2,h3,.serif{font-family:Georgia,"Times New Roman","Noto Serif CJK TC",serif}
+h1{font-size:1.5rem;line-height:1.35;margin:0 0 .2rem;letter-spacing:.01em}
+h2{font-size:1.16rem;line-height:1.4;margin:1.6rem 0 .6rem;
+   padding-bottom:.25rem;border-bottom:.06rem solid #d8c9a8}
+h3{font-size:1rem;line-height:1.45;margin:1.1rem 0 .4rem;color:#4a3f2c}
+a{color:#7a4a1c}
+.sub{color:#6b5f45;font-size:.86rem;line-height:1.7;margin:0}
+.hdr{padding:.4rem 0 1rem;border-bottom:.1rem solid #d8c9a8;margin-bottom:1rem}
+
+/* 搜尋 */
+.searchbar{display:flex;gap:.4rem;margin:1rem 0 .7rem;flex-wrap:wrap}
+input[type=search],select{
+  font:inherit;font-size:.92rem;padding:.5rem .6rem;border-radius:.4rem;
+  border:.07rem solid #c9b992;background:#faf5e9;color:#1a1a16;min-width:0;flex:1 1 8rem;
+}
+input[type=search]:focus,select:focus{outline:.12rem solid #7a8b56;outline-offset:.05rem}
+
+/* 篩選 chips */
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.2rem 0 1.2rem}
+.chip{
+  font-size:.8rem;line-height:1.5;padding:.35rem .7rem;border-radius:2rem;
+  border:.07rem solid #c9b992;background:#faf5e9;color:#4a3f2c;
+  cursor:pointer;user-select:none;font-family:inherit;
+}
+.chip[aria-pressed=true]{background:#5c6b3d;border-color:#5c6b3d;color:#fdf9ee}
+.chip .n{opacity:.72;font-size:.72rem}
+
+/* 卡片 */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.7rem}
+.card{
+  background:#faf5e9;border:.07rem solid #ded0b0;border-radius:.55rem;
+  overflow:hidden;cursor:pointer;text-decoration:none;color:inherit;display:block;
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.card:active{transform:scale(.985)}
+.card .ph{display:block;width:100%;height:7.4rem;object-fit:cover;background:#e6dcc4}
+.card .ph.empty{display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:#b8a880}
+.card .bd{padding:.5rem .55rem .6rem}
+.card .nm{font-family:Georgia,serif;font-size:.95rem;line-height:1.35;font-weight:600;
+          display:block;margin-bottom:.15rem}
+.card .mt{font-size:.72rem;line-height:1.5;color:#6b5f45;display:block}
+
+/* 真偽標籤 */
+.badge{display:inline-block;font-size:.7rem;line-height:1.5;padding:.1rem .45rem;
+       border-radius:.25rem;margin-top:.3rem;font-family:inherit}
+.b-genuine{background:#dce8c8;color:#3d5a1e;border:.05rem solid #a9c07d}
+.b-pending{background:#f6e4c0;color:#7a5218;border:.05rem solid #d9b878}
+.b-replica{background:#eed3d3;color:#8a2b2b;border:.05rem solid #c99898}
+
+/* 詳情 */
+.back{display:inline-block;font-size:.85rem;margin:.2rem 0 .8rem;cursor:pointer;
+      border:.07rem solid #c9b992;border-radius:2rem;padding:.2rem .75rem;background:#faf5e9}
+.hero{width:100%;max-height:13rem;object-fit:contain;background:#e6dcc4;border-radius:.5rem;display:block}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:.15rem .7rem;margin:.7rem 0}
+.kv .k{font-size:.82rem;color:#6b5f45;line-height:1.8}
+.kv .v{font-size:1rem;line-height:1.8;font-weight:600}
+.note{background:#f3ead6;border-left:.16rem solid #a98c4e;border-radius:0 .35rem .35rem 0;
+      padding:.55rem .7rem;margin:.8rem 0;font-size:.9rem;line-height:1.8}
+.note.warn{border-left-color:#b06a3a}
+ul.hist,ul.check{margin:.3rem 0 .8rem;padding-left:1.15rem;font-size:1rem;line-height:2.0}
+ul.hist li,ul.check li{margin-bottom:.35rem}
+ul.hist li::marker{color:#a98c4e}
+
+/* 表格 */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:.5rem 0 1rem}
+table{border-collapse:collapse;width:100%;font-size:.8rem;line-height:1.7}
+th,td{text-align:left;padding:.4rem .5rem;border-bottom:.06rem solid #ded0b0;vertical-align:top}
+th{background:#efe4cc;color:#4a3f2c;font-weight:600;font-size:.75rem}
+td.p{color:#8a4b1e;font-weight:600}
+
+footer{margin-top:2rem;padding-top:.9rem;border-top:.1rem solid #d8c9a8;
+       font-size:.78rem;line-height:1.8;color:#6b5f45}
+.empty-state{text-align:center;padding:2rem .5rem;color:#6b5f45;font-size:.92rem}
+
+@media(max-width:640px){
+  html{font-size:26px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(8rem,1fr))}
+  /* 表格變堆疊卡 */
+  .tw{overflow-x:visible}
+  .tw table,.tw thead,.tw tbody,.tw tr,.tw td{display:block;width:100%}
+  .tw thead{display:none}
+  .tw tr{background:#f4ecda;border-radius:.4rem;padding:.45rem .55rem;
+         margin-bottom:.5rem;border:.04rem solid #e0d3b6}
+  .tw td{border-bottom:none;padding:.18rem 0;font-size:1rem;line-height:1.75;
+         white-space:normal !important}
+  .tw td::before{content:attr(data-label);display:block;font-size:.72rem;
+                 color:#6b5f45;letter-spacing:.05em;line-height:1.4}
+  .kv{grid-template-columns:1fr;gap:0}
+  .kv .k{margin-top:.4rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hdr">
+    <h1>收藏檔案</h1>
+    <p class="sub" id="hdrs">載入中…</p>
+  </header>
+
+  <main id="app">
+    <div class="empty-state">正在載入藏品資料…</div>
+  </main>
+
+  <footer>
+    <p><b>收錄規則</b>：本目錄只收錄 <b>目視可確認真品</b> 及 <b>需額外認證嘅待確認物件</b>。
+    仿真品、假貨、拼接件一律只存私人庫，<b>永不在此出現</b>。此閘門由程式強制執行，非人手勾選。</p>
+    <p><b>價格</b>：只列已見成交紀錄及來源，<b>唔作估算</b>。搵唔到就寫「暫無資料」。</p>
+    <p><b>真偽</b>：由收藏者本人判定。<b>AI 唔會定真偽，亦唔會認錢文</b>。</p>
+    <p style="margin-top:.7rem;opacity:.8">由 無虛 (mo mo) 建立 · 公開版本</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+var DATA=null, SCHEMA=null, FILTER="all", Q="";
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+
+function authInfo(k){
+  var m={genuine:["✅ 真品","b-genuine"],pending:["⏳ 待確認","b-pending"],
+    replica:["🔒 私人參考","b-replica"],natural:["🌿 天然未處理","b-genuine"],
+    treated:["⚗️ 有處理","b-pending"],composite:["🔒 私人參考","b-replica"]};
+  return m[k]||[k||"未判定","b-pending"];
+}
+function badge(k){
+  var a=authInfo(k);
+  return '<span class="badge '+a[1]+'">'+esc(a[0])+'</span>';
+}
+function catInfo(k){
+  if(!SCHEMA) return {zh:k,emoji:"•"};
+  for(var i=0;i<SCHEMA.categories.length;i++)
+    if(SCHEMA.categories[i].key===k) return SCHEMA.categories[i];
+  return {zh:k,emoji:"•"};
+}
+function fmtRho(r){
+  if(!r||r.length!==2) return null;
+  return r[0].toFixed(2)+" – "+r[1].toFixed(2)+" g/cm³";
+}
+function tbl(headers,rows){
+  var th=headers.map(function(h){return "<th>"+esc(h)+"</th>";}).join("");
+  var trs=rows.map(function(r){
+    var tds=r.map(function(c,i){
+      return '<td data-label="'+esc(headers[i])+'">'+(i===0?'<span class="p">'+c+'</span>':c)+"</td>";
+    }).join("");
+    return "<tr>"+tds+"</tr>";
+  }).join("");
+  return '<div class="tw"><table><thead><tr>'+th+'</tr></thead><tbody>'+trs+'</tbody></table></div>';
+}
+
+function match(it){
+  if(FILTER!=="all" && it.category!==FILTER) return false;
+  if(!Q) return true;
+  var hay=[it.name,it.name_en,it.era,it.year,it.notes_public,(it.tags||[]).join(" "),
+    it.grade,it.issuer].join(" ").toLowerCase();
+  return hay.indexOf(Q.toLowerCase())>=0;
+}
+
+function renderList(){
+  var items=DATA.items.filter(match);
+  var counts={all:DATA.items.length};
+  DATA.items.forEach(function(i){counts[i.category]=(counts[i.category]||0)+1;});
+
+  var chips=['<button class="chip" data-f="all" aria-pressed="'+(FILTER==="all")+'">全部 <span class="n">'+DATA.items.length+"</span></button>"];
+  if(SCHEMA) SCHEMA.categories.forEach(function(c){
+    if(!counts[c.key]) return;
+    chips.push('<button class="chip" data-f="'+c.key+'" aria-pressed="'+(FILTER===c.key)+'">'+
+      c.emoji+" "+esc(c.zh)+' <span class="n">'+counts[c.key]+"</span></button>");
+  });
+
+  var cards=items.map(function(it){
+    var ph=it.photos&&it.photos[0]
+      ? '<img class="ph" loading="lazy" src="photos/'+esc(it.photos[0])+'" alt="'+esc(it.name)+'">'
+      : '<span class="ph empty">'+catInfo(it.category).emoji+'</span>';
+    return '<a class="card" href="#/item/'+esc(it.id)+'">'+ph+'<span class="bd">'+
+      '<span class="nm">'+esc(it.name)+"</span>"+
+      '<span class="mt">'+esc(it.era||"")+(it.year?" · "+esc(it.year):"")+"</span>"+
+      badge(it.authenticity)+"</span></a>";
+  }).join("");
+
+  document.getElementById("app").innerHTML =
+    '<div class="searchbar">'+
+      '<input type="search" id="q" placeholder="搜尋名稱／朝代／標籤…" value="'+esc(Q)+'">'+
+    "</div>"+
+    '<div class="chips">'+chips.join("")+"</div>"+
+    (items.length
+      ? '<div class="grid">'+cards+"</div>"
+      : '<div class="empty-state">冇符合嘅藏品。<br>試下清空搜尋或揀「全部」。</div>');
+
+  var qi=document.getElementById("q");
+  qi.addEventListener("input",function(){Q=this.value;renderList();
+    var n=document.getElementById("q"); n.focus(); n.setSelectionRange(Q.length,Q.length);});
+  Array.prototype.forEach.call(document.querySelectorAll(".chip"),function(b){
+    b.addEventListener("click",function(){FILTER=this.getAttribute("data-f");renderList();});
+  });
+
+  var pend=DATA.items.filter(function(i){return i.authenticity==="pending";}).length;
+  document.getElementById("hdrs").innerHTML =
+    DATA.items.length+" 件藏品 · "+pend+" 件待確認 · 更新於 "+esc(DATA.meta.updated);
+}
+
+function renderItem(id){
+  var it=null;
+  for(var i=0;i<DATA.items.length;i++) if(DATA.items[i].id===id) it=DATA.items[i];
+  if(!it){location.hash="";return;}
+
+  var h='<span class="back" onclick="location.hash=\'\'">← 返回目錄</span>';
+  if(it.photos&&it.photos[0])
+    h+='<img class="hero" src="photos/'+esc(it.photos[0])+'" alt="'+esc(it.name)+'">';
+  h+='<h2 style="margin-top:1rem">'+esc(it.name)+"</h2>";
+  h+='<p class="sub">'+esc(it.era||"")+(it.year?" · "+esc(it.year):"")+
+     (it.name_en?" · "+esc(it.name_en):"")+"</p>";
+  h+="<div>"+badge(it.authenticity)+(it.grade?' <span class="badge b-pending" style="background:#efe4cc;color:#4a3f2c;border-color:#d8c9a8">'+esc(it.grade)+"</span>":"")+"</div>";
+
+  var s=it.spec||{};
+  var rows=[];
+  if(s.diameter_mm) rows.push(["直徑",s.diameter_mm+" mm"]);
+  if(s.weight_g) rows.push(["重量",s.weight_g+" g"]);
+  if(s.thickness_mm) rows.push(["厚度",s.thickness_mm+" mm"]);
+  if(s.hole_mm) rows.push(["穿徑（方孔）",s.hole_mm+" mm"]);
+  else if(it.category==="coin") rows.push(["穿徑（方孔）","未量 · 密度計算用 4.5–6.5 mm"]);
+  if(s.magnetic) rows.push(["磁性",esc(s.magnetic)]);
+  if(rows.length){
+    h+="<h3>規格</h3>";
+    rows.forEach(function(r){h+='<div class="kv"><span class="k">'+r[0]+'</span><span class="v">'+r[1]+"</span></div>";});
+  }
+
+  if(it.derived&&it.derived.density){
+    h+='<div class="note"><b>密度估算</b>：'+fmtRho(it.derived.density)+
+       "<br>"+(it.derived.density_note||"")+"</div>";
+  }
+
+  if(it.notes_public) h+='<div class="note">'+it.notes_public+"</div>";
+
+  if((it.history||[]).length){
+    h+="<h3>歷史背景（已核實）</h3><ul class=\"hist\">"+
+      it.history.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ul>";
+  }
+  if((it.varieties||[]).length){
+    h+="<h3>版別／規格對照</h3>"+tbl(["版別","直徑","重量","說明"],
+      it.varieties.map(function(v){return [esc(v.name),esc(v.diameter||"—"),esc(v.weight||"—"),esc(v.note||"")];}));
+  }
+  if((it.market||[]).length){
+    h+="<h3>市場價紀錄（實測成交／參考價，非估算）</h3>"+tbl(["價格","標的規格","來源"],
+      it.market.map(function(m){return [esc(m.price),esc(m.spec||"—"),esc(m.source||"—")];}));
+  } else {
+    h+="<h3>市場價紀錄</h3><div class=\"note warn\">暫無資料 —— 未搵到可靠成交紀錄，<b>唔作估算</b>。</div>";
+  }
+  if((it.checklist||[]).length){
+    h+="<h3>真偽檢查清單</h3><ul class=\"check\">"+
+      it.checklist.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ul>";
+  }
+  if((it.sources||[]).length){
+    h+="<h3>資料來源</h3><ul class=\"hist\">"+
+      it.sources.map(function(x){return "<li>"+esc(x)+"</li>";}).join("")+"</ul>";
+  }
+  h+='<span class="back" onclick="location.hash=\'\'">← 返回目錄</span>';
+  document.getElementById("app").innerHTML=h;
+  window.scrollTo(0,0);
+}
+
+function route(){
+  var m=(location.hash||"").match(/^#\/item\/(.+)$/);
+  if(m) renderItem(decodeURIComponent(m[1])); else renderList();
+}
+
+Promise.all([
+  fetch("data/public.json",{cache:"no-cache"}).then(function(r){return r.json();}),
+  fetch("data/schema.json",{cache:"no-cache"}).then(function(r){return r.json();}).catch(function(){return null;})
+]).then(function(res){
+  DATA=res[0]; SCHEMA=res[1];
+  route();
+}).catch(function(e){
+  document.getElementById("app").innerHTML=
+    '<div class="empty-state">資料載入失敗。<br>請稍後重新整理。<br><small>'+
+    esc(e.message)+"</small></div>";
+});
+
+window.addEventListener("hashchange",route);
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+})();
+</script>
+</body>
+</html>

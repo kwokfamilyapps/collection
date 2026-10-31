@@ -1,0 +1,17 @@
+{
+ "name": "收藏檔案 · 無虛",
+ "short_name": "收藏檔案",
+ "description": "私人藏品數碼目錄：錢幣、紙幣、郵票、手錶、化石、礦石",
+ "start_url": "index.html",
+ "scope": "./",
+ "display": "standalone",
+ "orientation": "portrait",
+ "background_color": "#f0e8d8",
+ "theme_color": "#f0e8d8",
+ "lang": "zh-Hant-HK",
+ "icons": [
+  { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+  { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+  { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+ ]
+}

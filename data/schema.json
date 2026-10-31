@@ -1,0 +1,402 @@
+{
+ "categories": [
+  {
+   "key": "coin",
+   "zh": "錢幣",
+   "emoji": "🪙",
+   "auth_ok": [
+    "genuine",
+    "pending"
+   ],
+   "auth_bad": [
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "diameter_mm",
+     "zh": "直徑",
+     "u": "mm",
+     "t": "num"
+    },
+    {
+     "k": "weight_g",
+     "zh": "重量",
+     "u": "g",
+     "t": "num"
+    },
+    {
+     "k": "thickness_mm",
+     "zh": "厚度",
+     "u": "mm",
+     "t": "num"
+    },
+    {
+     "k": "hole_mm",
+     "zh": "穿徑（方孔）",
+     "u": "mm",
+     "t": "num"
+    },
+    {
+     "k": "magnetic",
+     "zh": "磁性",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "inscription",
+     "zh": "錢文（你親手打）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "dynasty",
+     "zh": "朝代",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "mint",
+     "zh": "鑄造局",
+     "u": "",
+     "t": "text"
+    }
+   ]
+  },
+  {
+   "key": "banknote",
+   "zh": "紙幣",
+   "emoji": "💵",
+   "auth_ok": [
+    "genuine",
+    "pending"
+   ],
+   "auth_bad": [
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "serial",
+     "zh": "冠字號碼",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "denom",
+     "zh": "面額",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "year_ver",
+     "zh": "年版",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "grade",
+     "zh": "評級（PMG／PCGS）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "catalog_no",
+     "zh": "目錄編號（Pick#）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "watermark",
+     "zh": "水印",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "signature",
+     "zh": "簽名版別",
+     "u": "",
+     "t": "text"
+    }
+   ]
+  },
+  {
+   "key": "stamp",
+   "zh": "郵票",
+   "emoji": "📮",
+   "auth_ok": [
+    "genuine",
+    "pending"
+   ],
+   "auth_bad": [
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "catalog_no",
+     "zh": "目錄編號（Scott/Michel/中國郵票目錄）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "perf",
+     "zh": "齒孔度",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "watermark",
+     "zh": "水印",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "issue_type",
+     "zh": "版別",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "issue_qty",
+     "zh": "發行量",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "condition",
+     "zh": "狀態（MNH／Used）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "gum",
+     "zh": "背膠",
+     "u": "",
+     "t": "text"
+    }
+   ]
+  },
+  {
+   "key": "watch",
+   "zh": "手錶",
+   "emoji": "⌚",
+   "auth_ok": [
+    "genuine",
+    "pending"
+   ],
+   "auth_bad": [
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "brand",
+     "zh": "品牌",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "model",
+     "zh": "型號",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "movement",
+     "zh": "機芯",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "case_no",
+     "zh": "錶殼序號（私人）",
+     "u": "",
+     "t": "text",
+     "private": true
+    },
+    {
+     "k": "year_make",
+     "zh": "年份",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "case_mm",
+     "zh": "錶徑",
+     "u": "mm",
+     "t": "num"
+    },
+    {
+     "k": "material",
+     "zh": "材質",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "originality",
+     "zh": "原裝度（錶冠／錶圈／面盤）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "service_log",
+     "zh": "服務記錄",
+     "u": "",
+     "t": "text"
+    }
+   ]
+  },
+  {
+   "key": "fossil",
+   "zh": "化石",
+   "emoji": "🦴",
+   "auth_ok": [
+    "natural",
+    "treated"
+   ],
+   "auth_bad": [
+    "composite",
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "species",
+     "zh": "物種",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "period",
+     "zh": "地質年代（紀／期）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "locality",
+     "zh": "產地",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "stratum",
+     "zh": "地層",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "size_cm",
+     "zh": "尺寸",
+     "u": "cm",
+     "t": "text"
+    },
+    {
+     "k": "restoration",
+     "zh": "修復程度（原骨比例）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "treatment",
+     "zh": "處理（拼接／上色／膠）",
+     "u": "",
+     "t": "text"
+    }
+   ]
+  },
+  {
+   "key": "mineral",
+   "zh": "礦石",
+   "emoji": "💎",
+   "auth_ok": [
+    "natural",
+    "treated"
+   ],
+   "auth_bad": [
+    "composite",
+    "replica"
+   ],
+   "fields": [
+    {
+     "k": "species",
+     "zh": "礦物種",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "crystal",
+     "zh": "晶系",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "mohs",
+     "zh": "硬度（Mohs）",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "locality",
+     "zh": "產地",
+     "u": "",
+     "t": "text"
+    },
+    {
+     "k": "size_cm",
+     "zh": "尺寸",
+     "u": "cm",
+     "t": "text"
+    },
+    {
+     "k": "weight_g",
+     "zh": "重量",
+     "u": "g",
+     "t": "num"
+    },
+    {
+     "k": "treatment",
+     "zh": "處理（天然／加熱／染色／樹脂填充／輻照）",
+     "u": "",
+     "t": "text"
+    }
+   ]
+  }
+ ],
+ "authenticity": [
+  {
+   "key": "genuine",
+   "zh": "真品（目視可確認）",
+   "public": true
+  },
+  {
+   "key": "pending",
+   "zh": "待確認（需額外認證）",
+   "public": true
+  },
+  {
+   "key": "replica",
+   "zh": "仿真／假貨（私人參考）",
+   "public": false
+  },
+  {
+   "key": "natural",
+   "zh": "天然未處理",
+   "public": true
+  },
+  {
+   "key": "treated",
+   "zh": "有處理（會註明方式）",
+   "public": true
+  },
+  {
+   "key": "composite",
+   "zh": "拼接／人造（私人參考）",
+   "public": false
+  }
+ ],
+ "private_fields": [
+  "notes_private",
+  "purchase_price",
+  "acquired_from",
+  "location",
+  "serial_no",
+  "valuation_private",
+  "case_no"
+ ]
+}

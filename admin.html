@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5">
+<title>收藏檔案 · 管理</title>
+<meta name="theme-color" content="#2f3a24">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+html{font-size:32px}
+*{box-sizing:border-box}
+body{margin:0;background:#f0e8d8;color:#1a1a16;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang HK","Noto Sans CJK HK",sans-serif;
+  font-size:1rem;line-height:1.9;-webkit-text-size-adjust:100%}
+.wrap{max-width:26rem;margin:0 auto;padding:.8rem .7rem 4rem}
+h1,h2,h3{font-family:Georgia,"Noto Serif CJK TC",serif;line-height:1.35}
+h1{font-size:1.3rem;margin:0 0 .2rem}
+h2{font-size:1.1rem;margin:1.3rem 0 .5rem;padding-bottom:.2rem;border-bottom:.06rem solid #d8c9a8}
+h3{font-size:.95rem;margin:.9rem 0 .35rem;color:#4a3f2c}
+a{color:#7a4a1c}
+.sub{color:#6b5f45;font-size:.82rem;line-height:1.7;margin:0}
+.hdr{padding:.3rem 0 .8rem;border-bottom:.1rem solid #d8c9a8;margin-bottom:.8rem}
+.topbar{display:flex;gap:.35rem;flex-wrap:wrap;margin:.6rem 0}
+button,.btn{font:inherit;font-size:.85rem;line-height:1.5;padding:.5rem .75rem;border-radius:.4rem;
+  border:.07rem solid #c9b992;background:#faf5e9;color:#1a1a16;cursor:pointer;font-family:inherit;
+  display:inline-block;text-align:center;text-decoration:none}
+button:active{transform:scale(.98)}
+button.pri{background:#5c6b3d;border-color:#5c6b3d;color:#fdf9ee;font-weight:600}
+button.dan{background:#f3dede;border-color:#c99898;color:#8a2b2b}
+button.gho{background:transparent}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select,textarea{font:inherit;font-size:.9rem;padding:.5rem .55rem;border-radius:.4rem;
+  border:.07rem solid #c9b992;background:#faf5e9;color:#1a1a16;width:100%;max-width:100%;min-width:0}
+input:focus,select:focus,textarea:focus{outline:.12rem solid #7a8b56;outline-offset:.05rem}
+textarea{line-height:1.7;resize:vertical;min-height:4rem}
+label.fld{display:block;margin:.55rem 0}
+label.fld > span.lb{display:block;font-size:.76rem;color:#6b5f45;line-height:1.6;margin-bottom:.15rem}
+.hint{font-size:.72rem;color:#6b5f45;line-height:1.6;margin:.15rem 0 0}
+.panel{background:#faf5e9;border:.07rem solid #ded0b0;border-radius:.5rem;padding:.65rem .7rem;margin:.7rem 0}
+.panel.warn{background:#f8efe0;border-color:#d9b878}
+.panel.dan{background:#f8e8e8;border-color:#c99898}
+.panel.ok{background:#e8f0da;border-color:#a9c07d}
+.row{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.row > *{flex:0 1 auto}
+.grow{flex:1 1 6rem !important;min-width:0}
+.list{margin:.5rem 0}
+.it{background:#faf5e9;border:.07rem solid #ded0b0;border-left-width:.18rem;border-radius:.4rem;
+  padding:.45rem .6rem;margin-bottom:.4rem;cursor:pointer}
+.it.g{border-left-color:#7a9a44}
+.it.p{border-left-color:#d9a13a}
+.it.r{border-left-color:#b04a4a}
+.it .nm{font-family:Georgia,serif;font-weight:600;font-size:.92rem;line-height:1.4}
+.it .mt{font-size:.72rem;color:#6b5f45;line-height:1.6}
+.badge{display:inline-block;font-size:.68rem;line-height:1.5;padding:.06rem .4rem;border-radius:.22rem}
+.b-genuine{background:#dce8c8;color:#3d5a1e}
+.b-pending{background:#f6e4c0;color:#7a5218}
+.b-replica{background:#eed3d3;color:#8a2b2b}
+.tabs{display:flex;gap:.3rem;margin:.5rem 0 .8rem;flex-wrap:wrap}
+.tabs button{flex:1 1 auto;font-size:.78rem;padding:.4rem .5rem}
+.tabs button[aria-pressed=true]{background:#5c6b3d;border-color:#5c6b3d;color:#fdf9ee}
+img.pv{width:100%;max-height:11rem;object-fit:contain;background:#e6dcc4;border-radius:.4rem;display:block;margin:.4rem 0}
+.thumbs{display:flex;gap:.4rem;flex-wrap:wrap;margin:.4rem 0}
+.thumbs .t{position:relative}
+.thumbs img{width:4.4rem;height:4.4rem;object-fit:cover;border-radius:.35rem;background:#e6dcc4;display:block}
+.thumbs .x{position:absolute;top:-.3rem;right:-.3rem;width:1.3rem;height:1.3rem;border-radius:50%;
+  background:#b04a4a;color:#fff;font-size:.85rem;line-height:1.3rem;text-align:center;cursor:pointer;
+  border:none;padding:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:.1rem .6rem}
+.kv .k{font-size:.76rem;color:#6b5f45}
+.kv .v{font-size:.88rem;font-weight:600}
+hr{border:none;border-top:.06rem solid #ded0b0;margin:.9rem 0}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:.68rem;word-break:break-all;line-height:1.5}
+.back{display:inline-block;font-size:.8rem;margin:.2rem 0 .6rem;cursor:pointer;
+  border:.07rem solid #c9b992;border-radius:2rem;padding:.18rem .7rem;background:#faf5e9}
+footer{margin-top:1.6rem;padding-top:.7rem;border-top:.1rem solid #d8c9a8;
+  font-size:.72rem;line-height:1.7;color:#6b5f45}
+@media(max-width:640px){html{font-size:26px}
+  .kv{grid-template-columns:1fr;gap:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hdr">
+    <h1>收藏檔案 · 管理</h1>
+    <p class="sub" id="hdrs">載入中…</p>
+    <div class="topbar" id="topbar"></div>
+  </header>
+  <main id="app"><div class="sub">正在載入…</div></main>
+  <footer>
+    <p><b>真偽閘門</b>：仿真／假貨／拼接件永遠唔會寫入 <span class="mono">data/public.json</span>。<br>
+    呢個閘門由匯出程式強制執行，唔係人手勾選。</p>
+    <p class="mono" style="margin-top:.5rem">本頁設 noindex，唔會被搜尋引擎收錄。</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ 常數 ============ */
+var LS_DB="momo_coll_db_v1", LS_TOK="momo_coll_tok", LS_REPO="momo_coll_repo";
+var REPO_DEFAULT="kwokfamilyapps/collection", BRANCH="main";
+var API="https://api.github.com";
+var ITER=310000;
+
+var PUBLIC_FIELDS=["id","category","name","name_en","era","year","issuer","authenticity",
+  "grade","spec","derived","photos","notes_public","history","varieties","market",
+  "checklist","tags","sources","updated"];
+var PRIVATE_FIELDS=["notes_private","purchase_price","acquired_from","location",
+  "serial_no","valuation_private"];
+
+var S={db:null,schema:null,view:"list",editId:null,dirty:false,unlocked:false};
+
+/* ============ 小工具 ============ */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function today(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function uid(){return "i"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+function toast(msg,ms){
+  var d=document.createElement("div");
+  d.textContent=msg;
+  d.style.cssText="position:fixed;left:50%;transform:translateX(-50%);bottom:1.2rem;z-index:99;"+
+    "background:#2f3a24;color:#fdf9ee;padding:.55rem .9rem;border-radius:.5rem;font-size:.82rem;"+
+    "max-width:22rem;line-height:1.6;box-shadow:0 .2rem .8rem rgba(0,0,0,.25)";
+  document.body.appendChild(d);
+  setTimeout(function(){d.remove();},ms||2600);
+}
+function catOf(k){ if(!S.schema) return {zh:k,emoji:"•",auth_ok:["genuine","pending"],auth_bad:["replica"],fields:[]};
+  for(var i=0;i<S.schema.categories.length;i++) if(S.schema.categories[i].key===k) return S.schema.categories[i];
+  return {zh:k,emoji:"•",auth_ok:["genuine","pending"],auth_bad:["replica"],fields:[]};}
+function authLabel(k){ if(!S.schema) return k;
+  for(var i=0;i<S.schema.authenticity.length;i++) if(S.schema.authenticity[i].key===k) return S.schema.authenticity[i].zh;
+  return k;}
+function isPublicAuth(k){
+  if(!S.schema) return k==="genuine"||k==="pending";
+  for(var i=0;i<S.schema.authenticity.length;i++)
+    if(S.schema.authenticity[i].key===k) return !!S.schema.authenticity[i].public;
+  return false;}
+function badgeCls(k){return k==="genuine"||k==="natural"?"b-genuine":
+  (k==="replica"||k==="composite"?"b-replica":"b-pending");}
+
+/* 密度：ρ = 重量 ÷ [ π/4 × (直徑² − 穿徑²) × 厚度 ] */
+function calcDensity(weight_g,d_mm,t_mm,h1,h2){
+  if(!(weight_g>0&&d_mm>0&&t_mm>0)) return null;
+  h1=(h1>0?h1:4.5)/10; h2=(h2>0?h2:6.5)/10;
+  var D=d_mm/10, t=t_mm/10;
+  var v1=Math.PI/4*(D*D-h1*h1)*t, v2=Math.PI/4*(D*D-h2*h2)*t;
+  var a=weight_g/Math.max(v1,v2), b=weight_g/Math.min(v1,v2);
+  return [Math.round(a*100)/100,Math.round(b*100)/100];
+}
+
+/* ============ 儲存 ============ */
+function loadLocal(){
+  try{ var raw=localStorage.getItem(LS_DB); if(raw) return JSON.parse(raw); }catch(e){}
+  return null;
+}
+function saveLocal(){
+  try{ localStorage.setItem(LS_DB,JSON.stringify(S.db)); S.dirty=false; }
+  catch(e){ toast("本機儲存失敗（可能空間不足）："+e.message); }
+}
+
+/* ============ 加密（AES-GCM 256 + PBKDF2-SHA256） ============ */
+function b64(buf){ var b=new Uint8Array(buf),s=""; for(var i=0;i<b.length;i++) s+=String.fromCharCode(b[i]);
+  return btoa(s); }
+function unb64(s){ var bin=atob(s),u=new Uint8Array(bin.length);
+  for(var i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return u; }
+
+function deriveKey(pw,salt,iter){
+  var enc=new TextEncoder();
+  return crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"])
+    .then(function(base){
+      return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:iter,hash:"SHA-256"},
+        base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+    });
+}
+function encryptVault(pw,obj){
+  var salt=crypto.getRandomValues(new Uint8Array(16));
+  var iv=crypto.getRandomValues(new Uint8Array(12));
+  var data=new TextEncoder().encode(JSON.stringify(obj));
+  return deriveKey(pw,salt,ITER).then(function(key){
+    return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,data);
+  }).then(function(ct){
+    return {v:1,kdf:"PBKDF2-SHA256",iter:ITER,cipher:"AES-GCM-256",
+      salt:b64(salt),iv:b64(iv),ct:b64(ct),items:obj.items?obj.items.length:0,
+      created:new Date().toISOString()};
+  });
+}
+function decryptVault(pw,blob){
+  return deriveKey(pw,unb64(blob.salt),blob.iter||ITER).then(function(key){
+    return crypto.subtle.decrypt({name:"AES-GCM",iv:unb64(blob.iv)},key,unb64(blob.ct));
+  }).then(function(pt){ return JSON.parse(new TextDecoder().decode(pt)); });
+}
+
+/* ============ 匯出公開資料（閘門） ============ */
+function buildPublic(){
+  var out=[], dropped=[];
+  S.db.items.forEach(function(it){
+    if(!isPublicAuth(it.authenticity)){ dropped.push(it); return; }
+    var o={};
+    PUBLIC_FIELDS.forEach(function(k){ if(it[k]!==undefined&&it[k]!==null&&it[k]!=="") o[k]=it[k]; });
+    out.push(o);
+  });
+  var doc={meta:{version:1,schema:"momo-collection/v1",owner:"Vernon Kwok",
+    updated:today(),count:out.length,
+    note:"只包含公開物品（真品 / 待確認）。仿真、假貨只存私人庫，永不在此檔出現。",
+    densities:S.db.meta.densities||[]},items:out};
+  return {doc:doc,dropped:dropped};
+}
+
+/* ============ GitHub ============ */
+function ghToken(){ return localStorage.getItem(LS_TOK)||""; }
+function ghRepo(){ return localStorage.getItem(LS_REPO)||REPO_DEFAULT; }
+function gh(path,method,payload,tok){
+  return fetch(API+path,{method:method||"GET",
+    headers:{"Authorization":"Bearer "+(tok||ghToken()),"Accept":"application/vnd.github+json",
+      "X-GitHub-Api-Version":"2022-11-28"},
+    body:payload?JSON.stringify(payload):undefined
+  }).then(function(r){
+    return r.json().catch(function(){return {};}).then(function(j){
+      return {ok:r.ok,status:r.status,data:j};
+    });
+  });
+}
+function putFile(remotePath,contentB64,message,sha){
+  var repo=ghRepo();
+  var payload={message:message,content:contentB64,branch:BRANCH};
+  if(sha) payload.sha=sha;
+  return gh("/repos/"+repo+"/contents/"+remotePath,"PUT",payload);
+}
+function getSha(remotePath){
+  return gh("/repos/"+ghRepo()+"/contents/"+remotePath+"?ref="+BRANCH).then(function(r){
+    if(r.ok&&r.data&&r.data.sha) return r.data.sha;
+    if(r.status===404) return null;
+    throw new Error("讀取 "+remotePath+" 失敗 ("+r.status+")");
+  });
+}
+
+/* ============ 相片 ============ */
+function resizeImage(file,maxDim){
+  return new Promise(function(res,rej){
+    var fr=new FileReader();
+    fr.onload=function(){
+      var img=new Image();
+      img.onload=function(){
+        var w=img.width,h=img.height,sc=Math.min(1,maxDim/Math.max(w,h));
+        var cw=Math.round(w*sc),ch=Math.round(h*sc);
+        var cv=document.createElement("canvas"); cv.width=cw; cv.height=ch;
+        cv.getContext("2d").drawImage(img,0,0,cw,ch);
+        var out=cv.toDataURL("image/webp",0.84);
+        if(out.indexOf("data:image/webp")!==0) out=cv.toDataURL("image/jpeg",0.85);
+        res({dataUrl:out,w:cw,h:ch});
+      };
+      img.onerror=function(){rej(new Error("相片讀取失敗"));};
+      img.src=fr.result;
+    };
+    fr.onerror=function(){rej(new Error("檔案讀取失敗"));};
+    fr.readAsDataURL(file);
+  });
+}
+
+/* ============ 畫面 ============ */
+function renderTop(){
+  var it=S.db.items||[];
+  var pub=it.filter(function(i){return isPublicAuth(i.authenticity);}).length;
+  var priv=it.length-pub;
+  var pend=it.filter(function(i){return i.authenticity==="pending";}).length;
+  $("hdrs").innerHTML=it.length+" 件 · 公開 "+pub+" · 私人 "+priv+" · 待判定 "+pend+
+    " · 更新 "+esc(S.db.meta.updated||"—");
+  var tok=ghToken();
+  var b='<button class="pri" data-act="add">＋ 新增物件</button>'+
+    '<button data-act="pub-preview">👁 公開預覽</button>'+
+    '<button data-act="publish">📤 發佈上線</button>'+
+    '<button data-act="backup">💾 備份</button>'+
+    '<button data-act="settings">⚙️ 設定</button>'+
+    (tok?'':'<span class="badge b-pending">未設 token</span>');
+  $("topbar").innerHTML=b;
+}
+
+function authBadge(k){ return '<span class="badge '+badgeCls(k)+'">'+esc(authLabel(k))+'</span>'; }
+
+function renderList(){
+  var it=(S.db.items||[]).slice().sort(function(a,b){
+    return (a.category||"").localeCompare(b.category||"")||(a.id>b.id?1:-1);});
+  var h='<div class="row" style="margin:.4rem 0"><input class="grow" id="q" type="search" placeholder="搜尋…"></div>';
+  h+='<div class="list" id="list">';
+  if(!it.length) h+='<div class="sub">仲未有物件。按「＋ 新增物件」開始。</div>';
+  it.forEach(function(x){
+    var cls=x.authenticity==="genuine"||x.authenticity==="natural"?"g":
+      (isPublicAuth(x.authenticity)?"p":"r");
+    var c=catOf(x.category);
+    h+='<div class="it '+cls+'" data-id="'+esc(x.id)+'">'+
+      '<div class="nm">'+c.emoji+" "+esc(x.name)+"</div>"+
+      '<div class="mt">'+esc(c.zh)+" · "+esc(x.era||"—")+" · "+authBadge(x.authenticity)+
+      (x.photos&&x.photos.length?" · 📷"+x.photos.length:" · 冇相")+"</div></div>";
+  });
+  h+="</div>";
+  $("app").innerHTML=h;
+  var q=$("q");
+  q.addEventListener("input",function(){
+    var v=this.value.toLowerCase();
+    Array.prototype.forEach.call(document.querySelectorAll(".it"),function(el){
+      var t=el.textContent.toLowerCase();
+      el.style.display=(!v||t.indexOf(v)>=0)?"":"none";
+    });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".it"),function(el){
+    el.addEventListener("click",function(){ openEdit(this.getAttribute("data-id")); });
+  });
+}
+
+/* ---------- 編輯／新增 ---------- */
+function openEdit(id){
+  S.editId=id||null;
+  var it=null;
+  if(id) for(var i=0;i<S.db.items.length;i++) if(S.db.items[i].id===id) it=S.db.items[i];
+  if(!it) it={id:uid(),category:"coin",name:"",authenticity:"pending",spec:{},photos:[],
+    history:[],varieties:[],market:[],checklist:[],tags:[],sources:[],updated:today()};
+  curPhotos=(it.photos||[]).slice();
+  renderEdit(it);
+}
+
+function renderEdit(it){
+  var isNew=!S.editId;
+  var c=catOf(it.category);
+  var h='<span class="back" data-act="cancel">← 取消</span>';
+  h+="<h2>"+(isNew?"新增物件":"編輯 · "+esc(it.name||it.id))+"</h2>";
+
+  /* 分類 */
+  h+='<label class="fld"><span class="lb">分類</span><select id="f_cat">';
+  (S.schema?S.schema.categories:[]).forEach(function(x){
+    h+='<option value="'+x.key+'"'+(x.key===it.category?" selected":"")+">"+x.emoji+" "+esc(x.zh)+"</option>";
+  });
+  h+="</select></label>";
+
+  /* 名稱 */
+  h+='<label class="fld"><span class="lb">名稱（中文）*</span>'+
+     '<input id="f_name" value="'+esc(it.name)+'" placeholder="例：直百五銖"></label>';
+  h+='<label class="fld"><span class="lb">英文名（可留空）</span>'+
+     '<input id="f_name_en" value="'+esc(it.name_en||"")+'"></label>';
+  h+='<label class="fld"><span class="lb">朝代／產地</span>'+
+     '<input id="f_era" value="'+esc(it.era||"")+'" placeholder="例：蜀漢（三國）"></label>';
+  h+='<label class="fld"><span class="lb">年份／年代</span>'+
+     '<input id="f_year" value="'+esc(it.year||"")+'" placeholder="例：公元 214 年"></label>';
+
+  /* 真偽閘門 */
+  h+='<h3>🔒 真偽判定（決定公開與否）</h3><div class="panel"><select id="f_auth">';
+  var opts=(S.schema?S.schema.authenticity:[]).filter(function(a){
+    return c.auth_ok.indexOf(a.key)>=0 || c.auth_bad.indexOf(a.key)>=0;});
+  opts.forEach(function(a){
+    h+='<option value="'+a.key+'"'+(a.key===it.authenticity?" selected":"")+">"+
+      (a.public?"🌐 公開 — ":"🔒 私人 — ")+esc(a.zh)+"</option>";
+  });
+  h+="</select>";
+  h+='<p class="hint" id="auth_hint"></p></div>';
+
+  /* 分類專屬欄位 */
+  h+='<h3>規格</h3><div id="catfields">';
+  c.fields.forEach(function(f){
+    var v=(it.spec&&it.spec[f.k]!=null)?it.spec[f.k]:"";
+    h+='<label class="fld"><span class="lb">'+esc(f.zh)+(f.u?"（"+esc(f.u)+"）":"")+
+      (f.private?' <span class="badge b-replica">私人</span>':"")+"</span>"+
+      '<input data-fk="'+esc(f.k)+'" type="'+(f.t==="num"?"number":"text")+'" step="any" value="'+esc(v)+'"></label>';
+  });
+  h+="</div>";
+
+  /* 密度 */
+  h+='<div class="panel" id="densbox"><span class="lb">密度自動計算</span>'+
+     '<div id="densout" class="sub">量到直徑／重量／厚度就會自動計</div></div>';
+
+  /* 相片 */
+  h+='<h3>相片</h3>';
+  h+='<div class="panel"><div class="thumbs" id="thumbs"></div>'+
+     '<div class="row"><label class="btn" style="flex:1 1 8rem">📷 影相／揀相'+
+     '<input type="file" id="f_photo" accept="image/*" multiple style="display:none"></label></div>'+
+     '<p class="hint">相片會自動縮到最長邊 1600px、轉 WebP 壓縮。原檔請自行保留。</p></div>';
+
+  /* 描述 */
+  h+='<h3>描述</h3>';
+  h+='<label class="fld"><span class="lb">公開描述（會被全世界睇到）</span>'+
+     '<textarea id="f_notes_public">'+esc(it.notes_public||"")+"</textarea></label>";
+  h+='<label class="fld"><span class="lb">私人筆記（永不出公開頁）</span>'+
+     '<textarea id="f_notes_private">'+esc(it.notes_private||"")+"</textarea></label>";
+
+  /* 私人欄位 */
+  h+='<h3>🔐 私人資料（唔會公開）</h3><div class="panel warn">';
+  h+='<label class="fld"><span class="lb">買入價</span><input id="f_price" value="'+esc(it.purchase_price||"")+'"></label>';
+  h+='<label class="fld"><span class="lb">來源／賣家</span><input id="f_from" value="'+esc(it.acquired_from||"")+'"></label>';
+  h+='<label class="fld"><span class="lb">存放位置</span><input id="f_loc" value="'+esc(it.location||"")+'"></label>';
+  h+="</div>";
+
+  /* 標籤 */
+  h+='<label class="fld"><span class="lb">標籤（用逗號分隔）</span>'+
+     '<input id="f_tags" value="'+esc((it.tags||[]).join("、"))+'"></label>';
+
+  /* 檢查清單 */
+  h+='<label class="fld"><span class="lb">真偽檢查清單（每行一項）</span>'+
+     '<textarea id="f_check">'+esc((it.checklist||[]).join("\n"))+"</textarea></label>";
+
+  /* 歷史 */
+  h+='<label class="fld"><span class="lb">歷史背景（每行一項）</span>'+
+     '<textarea id="f_hist">'+esc((it.history||[]).join("\n"))+"</textarea></label>";
+
+  /* 來源 */
+  h+='<label class="fld"><span class="lb">資料來源（每行一項）</span>'+
+     '<textarea id="f_src">'+esc((it.sources||[]).join("\n"))+"</textarea></label>";
+
+  h+='<div class="row" style="margin-top:1rem">'+
+     '<button class="pri grow" data-act="save">💾 儲存</button>'+
+     (isNew?"":'<button class="dan" data-act="del">🗑 刪除</button>')+"</div>";
+
+  $("app").innerHTML=h;
+
+  /* 事件 */
+  $("f_photo").addEventListener("change",onPhotos);
+  $("f_cat").addEventListener("change",function(){
+    var cur=collectItem(S.editId);   /* 收集現有輸入，只換分類 */
+    curPhotos=(cur.photos||[]).slice();
+    S.editId=cur.id;
+    renderEdit(cur);
+  });
+  $("f_auth").addEventListener("change",updAuthHint);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-fk]"),function(el){
+    el.addEventListener("input",updDensity);
+  });
+  $("densbox").addEventListener("click",function(){});
+  updAuthHint(); updDensity(); renderThumbs();
+
+  /* 暫存相片 */
+}
+
+/* 目前編輯中嘅相片（base64 data URL 或檔名） */
+var curPhotos=[];
+
+function updAuthHint(){
+  var v=$("f_auth")?$("f_auth").value:"pending";
+  var pub=isPublicAuth(v);
+  var h=$("auth_hint");
+  if(!h) return;
+  if(v==="replica"||v==="composite"){
+    h.innerHTML='🔒 <b>私人庫</b>：呢件永遠唔會出現喺公開目錄，只留作你個人參考／對照學習。';
+    h.parentNode.className="panel dan";
+  } else if(v==="pending"){
+    h.innerHTML='⏳ <b>會公開</b>，但公開頁會顯示「待確認」標籤，並隱藏價格。證實有問題時改一個欄位即刻下架。';
+    h.parentNode.className="panel warn";
+  } else {
+    h.innerHTML='🌐 <b>會公開</b>：目錄頁全世界睇得到。';
+    h.parentNode.className="panel ok";
+  }
+}
+
+function updDensity(){
+  var spec={};
+  Array.prototype.forEach.call(document.querySelectorAll("[data-fk]"),function(el){
+    spec[el.getAttribute("data-fk")]=el.type==="number"?parseFloat(el.value):el.value;
+  });
+  var h1=parseFloat(spec.hole_mm)||4.5, h2=(spec.hole_mm?parseFloat(spec.hole_mm):6.5);
+  if(spec.hole_mm){ h1=parseFloat(spec.hole_mm); h2=h1; }
+  var r=calcDensity(spec.weight_g,spec.diameter_mm,spec.thickness_mm,h1,h2);
+  var o=$("densout"); if(!o) return;
+  if(!r){ o.innerHTML="量到直徑／重量／厚度就會自動計"; return; }
+  var lo=r[0],hi=r[1];
+  var cls="",txt="";
+  if(hi<7.87){ cls="b-replica"; txt="密度低過純鐵 7.87 → 可能係锈蝕鐵錢或非金屬"; }
+  else if(lo>10.5){ cls="b-replica"; txt="密度高過青銅太多 → 可能含鉛量極高或非銅質"; }
+  else if(lo>=8.4&&hi<=9.0){ cls="b-genuine"; txt="落標準青銅／黃銅範圍 ✓"; }
+  else { cls="b-pending"; txt="邊緣範圍，要配合锈色同聲音判斷"; }
+  o.innerHTML='<b style="font-size:1.05rem">'+lo.toFixed(2)+" – "+hi.toFixed(2)+" g/cm³</b>"+
+    (spec.hole_mm?' <span class="hint" style="display:inline">（穿徑 '+spec.hole_mm+' mm）</span>':
+      ' <span class="hint" style="display:inline">（穿徑未量 → 用 4.5–6.5 mm 範圍）</span>')+
+    '<br><span class="badge '+cls+'">'+esc(txt)+"</span>"+
+    '<br><span class="hint">對照：青銅 8.5–8.9 · 黃銅 8.4–8.7 · 純銅 8.96 · 純鐵 7.87 · 鉛 11.34</span>';
+}
+
+function renderThumbs(){
+  var t=$("thumbs"); if(!t) return;
+  t.innerHTML="";
+  curPhotos.forEach(function(p,i){
+    var src=(p.indexOf("data:")===0)?p:"photos/"+p;
+    var d=document.createElement("div"); d.className="t";
+    d.innerHTML='<img src="'+esc(src)+'" alt=""><button class="x" type="button">×</button>';
+    d.querySelector(".x").addEventListener("click",function(){ curPhotos.splice(i,1); renderThumbs(); });
+    t.appendChild(d);
+  });
+  if(!curPhotos.length) t.innerHTML='<span class="sub">未有相片</span>';
+}
+
+function onPhotos(e){
+  var files=Array.prototype.slice.call(e.target.files||[]);
+  if(!files.length) return;
+  toast("處理相片中…",6000);
+  var chain=Promise.resolve();
+  files.forEach(function(f){
+    chain=chain.then(function(){
+      return resizeImage(f,1600).then(function(r){
+        curPhotos.push(r.dataUrl);
+        renderThumbs();
+      }).catch(function(err){ toast("相片失敗："+err.message); });
+    });
+  });
+  chain.then(function(){ toast("相片已加入（"+curPhotos.length+" 張）"); e.target.value=""; });
+}
+
+function collectItem(keepId){
+  var spec={};
+  Array.prototype.forEach.call(document.querySelectorAll("[data-fk]"),function(el){
+    var v=el.value.trim();
+    if(v!=="") spec[el.getAttribute("data-fk")]=el.type==="number"?parseFloat(v):v;
+  });
+  function lines(id){ return ($(id)?$(id).value:"").split("\n").map(function(x){return x.trim();})
+    .filter(function(x){return x;}); }
+  function tags(id){ return ($(id)?$(id).value:"").split(/[、,，]/).map(function(x){return x.trim();})
+    .filter(function(x){return x;}); }
+  var it={
+    id:keepId===false?uid():(S.editId||uid()),
+    category:$("f_cat").value,
+    name:$("f_name").value.trim(),
+    name_en:$("f_name_en").value.trim(),
+    era:$("f_era").value.trim(),
+    year:$("f_year").value.trim(),
+    authenticity:$("f_auth").value,
+    grade:"",
+    spec:spec,
+    photos:curPhotos.slice(),
+    notes_public:$("f_notes_public").value.trim(),
+    notes_private:$("f_notes_private").value.trim(),
+    purchase_price:$("f_price").value.trim(),
+    acquired_from:$("f_from").value.trim(),
+    location:$("f_loc").value.trim(),
+    tags:tags("f_tags"),
+    checklist:lines("f_check"),
+    history:lines("f_hist"),
+    sources:lines("f_src"),
+    varieties:[], market:[],
+    updated:today()
+  };
+  var h1=spec.hole_mm||4.5, h2=spec.hole_mm||6.5;
+  var r=calcDensity(spec.weight_g,spec.diameter_mm,spec.thickness_mm,h1,h2);
+  it.derived={density:r,density_note:r?"由 App 自動計算（穿徑"+(spec.hole_mm?" "+spec.hole_mm+" mm":"假設 4.5–6.5 mm")+"）":""};
+  return it;
+}
+
+function doSave(){
+  var it=collectItem();
+  if(!it.name){ toast("請填名稱"); return; }
+  var idx=-1;
+  for(var i=0;i<S.db.items.length;i++) if(S.db.items[i].id===it.id) idx=i;
+  if(idx>=0){
+    /* 保留原本冇喺表單出現嘅欄位 */
+    var old=S.db.items[idx];
+    ["varieties","market"].forEach(function(k){ if((!it[k]||!it[k].length)&&old[k]&&old[k].length) it[k]=old[k]; });
+    S.db.items[idx]=it;
+  } else S.db.items.push(it);
+  S.db.meta.updated=today();
+  S.db.meta.count=S.db.items.length;
+  saveLocal();
+  S.view="list";
+  renderTop(); renderList();
+  toast(isPublicAuth(it.authenticity)?"已儲存 · 會公開":"已儲存 · 🔒 只存私人庫");
+}
+
+function openPreview(){
+  var r=buildPublic();
+  var h='<span class="back" data-act="cancel">← 返回</span><h2>👁 公開預覽</h2>';
+  h+='<div class="panel ok"><b>今次會公開 '+r.doc.items.length+' 件</b><br>'+
+     '<span class="sub">以下清單就係全世界會睇到嘅內容。</span></div>';
+  if(r.dropped.length){
+    h+='<div class="panel dan"><b>🔒 唔會公開 '+r.dropped.length+' 件</b><ul style="margin:.3rem 0 0;padding-left:1.1rem">'+
+      r.dropped.map(function(x){return "<li>"+esc(x.name)+" — "+esc(authLabel(x.authenticity))+"</li>";}).join("")+
+      "</ul></div>";
+  }
+  h+='<div class="list">';
+  r.doc.items.forEach(function(x){
+    var c=catOf(x.category);
+    h+='<div class="it '+(x.authenticity==="genuine"||x.authenticity==="natural"?"g":"p")+'">'+
+      '<div class="nm">'+c.emoji+" "+esc(x.name)+"</div>"+
+      '<div class="mt">'+authBadge(x.authenticity)+" · 欄位："+Object.keys(x).length+" 個</div></div>";
+  });
+  h+="</div>";
+  h+='<h3>檢查私人欄位有冇漏出</h3><div class="panel"><div class="mono" id="leakchk"></div></div>';
+  $("app").innerHTML=h;
+  var leaks=[];
+  r.doc.items.forEach(function(x){
+    PRIVATE_FIELDS.forEach(function(k){ if(x[k]!==undefined) leaks.push(x.id+"."+k); });
+  });
+  $("leakchk").innerHTML=leaks.length?
+    '<span style="color:#8a2b2b">⚠️ 發現 '+leaks.length+' 個私人欄位漏出：'+esc(leaks.join(", "))+"</span>":
+    '<span style="color:#3d5a1e">✅ 零私人欄位漏出（白名單匯出，'+
+      PRIVATE_FIELDS.length+" 個私人欄位全部擋住）</span>";
+  S.view="preview";
+}
+
+/* ---------- 發佈 ---------- */
+function openPublish(){
+  var tok=ghToken();
+  var h='<span class="back" data-act="cancel">← 返回</span><h2>📤 發佈上線</h2>';
+  if(!tok){
+    h+='<div class="panel warn"><b>需要 GitHub token（一次性設定）</b>'+
+      '<p class="hint" style="margin-top:.4rem">去 GitHub → Settings → Developer settings → '+
+      'Personal access tokens → <b>Fine-grained tokens</b> → Generate new token：<br>'+
+      '① Repository access：<b>Only select repositories</b> → <code>collection</code><br>'+
+      '② Permissions → Repository permissions → <b>Contents: Read and write</b><br>'+
+      '③ Expiration：可以揀 No expiration<br>'+
+      '④ 生成後複製個 token，貼落下面。</p>'+
+      '<label class="fld"><span class="lb">GitHub Token（只存喺你部電話）</span>'+
+      '<input id="f_tok" type="password" autocomplete="off" placeholder="github_pat_…"></label>'+
+      '<button class="pri" data-act="save-tok">儲存 token</button></div>';
+  } else {
+    var r=buildPublic();
+    h+='<div class="panel ok"><b>將會上載：</b><br>'+
+      "· <span class='mono'>data/public.json</span> — "+r.doc.items.length+" 件公開<br>"+
+      "· <span class='mono'>data/vault.enc.json</span> — "+S.db.items.length+" 件完整加密備份<br>"+
+      "· <span class='mono'>photos/</span> — 新相片</div>";
+    h+='<div class="panel"><label class="fld"><span class="lb">Vault 密碼（加密完整資料庫）</span>'+
+      '<input id="f_pw" type="password" autocomplete="new-password" placeholder="至少 8 個字元">'+
+      '</label><p class="hint">🔑 呢個密碼只有你知道。<b>忘記咗就解唔開雲端備份</b>（本機資料仍在）。'+
+      '建議寫落密碼管理器。</p></div>';
+    h+='<button class="pri" data-act="do-publish">開始上載</button>';
+  }
+  h+='<div class="panel"><span class="lb">Repo</span><div class="mono">'+esc(ghRepo())+" @ "+BRANCH+"</div>"+
+     '<button class="gho" data-act="chg-repo" style="margin-top:.4rem">更改 repo</button></div>';
+  h+='<div class="panel"><span class="lb">本機資料</span><div class="mono">'+
+     (S.db.items.length+" 件 · 儲存於此裝置 localStorage")+"</div></div>";
+  $("app").innerHTML=h;
+  S.view="publish";
+}
+
+function doPublishClick(){
+  var pw=$("f_pw")?$("f_pw").value:"";
+  if(pw.length<8){ toast("密碼至少 8 個字元"); return; }
+  toast("加密中…",4000);
+  publishAll(pw);
+}
+
+function publishAll(pw){
+  var r=buildPublic();
+  var db=S.db;
+  var log=[];
+  function step(msg){ log.push(msg); toast(msg,3000); }
+
+  /* 1. 上載相片 */
+  var jobs=[];
+  var seen={};
+  db.items.forEach(function(it){
+    (it.photos||[]).forEach(function(p,i){
+      if(p.indexOf("data:")!==0) return;
+      var m=p.match(/^data:image\/(\w+);base64,(.*)$/);
+      if(!m) return;
+      var ext=m[1]==="jpeg"?"jpg":m[1];
+      var safe=(it.id+"-"+(i+1)+"."+ext).replace(/[^A-Za-z0-9._-]/g,"");
+      if(seen[safe]) return;
+      seen[safe]=1;
+      jobs.push({item:it,idx:i,name:safe,b64:m[2]});
+    });
+  });
+
+  var chain=Promise.resolve();
+  var uploaded=0;
+  jobs.forEach(function(j){
+    chain=chain.then(function(){
+      step("上載相片 "+j.name+" ("+(uploaded+1)+"/"+jobs.length+")…");
+      return getSha("photos/"+j.name).then(function(sha){
+        return putFile("photos/"+j.name,j.b64,"photo: "+j.name,sha).then(function(res){
+          if(!res.ok) throw new Error("相片上載失敗 "+j.name+" ("+res.status+") "+(res.data.message||""));
+          j.item.photos[j.idx]=j.name;
+          uploaded++;
+        });
+      });
+    });
+  });
+
+  chain=chain.then(function(){
+    /* 相片檔名換好 → 重建公開資料 */
+    var pub=buildPublic();
+    var jsonStr=JSON.stringify(pub.doc,null,1);
+    var b64json=btoa(unescape(encodeURIComponent(jsonStr)));
+    step("上載 data/public.json …");
+    return getSha("data/public.json").then(function(sha){
+      return putFile("data/public.json",b64json,"publish: "+pub.doc.items.length+" public items",sha);
+    }).then(function(res){
+      if(!res.ok) throw new Error("public.json 上載失敗 ("+res.status+") "+(res.data.message||""));
+    });
+  }).then(function(){
+    step("加密 vault …");
+    return encryptVault(pw,db);
+  }).then(function(blob){
+    var b64v=btoa(unescape(encodeURIComponent(JSON.stringify(blob,null,1))));
+    step("上載 data/vault.enc.json …");
+    return getSha("data/vault.enc.json").then(function(sha){
+      return putFile("data/vault.enc.json",b64v,"vault: encrypted backup ("+db.items.length+" items)",sha);
+    }).then(function(res){
+      if(!res.ok) throw new Error("vault 上載失敗 ("+res.status+") "+(res.data.message||""));
+    });
+  }).then(function(){
+    saveLocal();
+    S.view="done";
+    var h='<h2>✅ 發佈完成</h2>';
+    h+='<div class="panel ok"><b>已上載</b><br>相片 '+uploaded+' 張 · public.json · vault.enc.json</div>';
+    h+='<div class="panel"><span class="lb">過程</span><div class="mono">'+esc(log.slice(-8).join("\n"))+"</div></div>";
+    h+='<a class="btn pri" href="index.html" style="margin-top:.6rem">睇公開目錄 →</a>';
+    $("app").innerHTML=h;
+    toast("發佈完成");
+    renderTop();
+  }).catch(function(e){
+    var h='<h2>⚠️ 發佈中斷</h2><div class="panel dan">'+esc(e.message)+"</div>";
+    h+='<span class="back" data-act="publish">← 再試</span>';
+    $("app").innerHTML=h;
+  });
+}
+
+/* ---------- 設定 ---------- */
+function openSettings(){
+  var it=S.db.items.length;
+  var h='<span class="back" data-act="cancel">← 返回</span><h2>⚙️ 設定</h2>';
+  h+='<div class="panel"><span class="lb">GitHub Repo</span>'+
+     '<div class="mono">'+esc(ghRepo())+"</div>"+
+     '<div class="row" style="margin-top:.4rem"><input class="grow" id="f_repo" value="'+esc(ghRepo())+'" placeholder="owner/repo">'+
+     '<button data-act="set-repo">儲存</button></div></div>';
+  h+='<div class="panel"><span class="lb">Token</span><div class="mono">'+
+     (ghToken()?"已設定（" + ghToken().slice(0,10)+"…）":"未設定")+"</div>"+
+     '<div class="row" style="margin-top:.4rem"><button class="dan" data-act="clear-tok">清除 token</button></div></div>';
+  h+='<div class="panel"><span class="lb">本機資料</span><div class="mono">'+it+" 件 · "+
+     (JSON.stringify(S.db).length/1024).toFixed(0)+" KB</div>"+
+     '<div class="row" style="margin-top:.4rem">'+
+     '<button data-act="backup">💾 下載備份</button>'+
+     '<label class="btn" style="flex:1 1 8rem">📥 匯入備份<input type="file" id="f_import" accept=".json,application/json" style="display:none"></label>'+
+     '<button class="dan" data-act="wipe">🗑 清空本機</button></div></div>';
+  h+='<div class="panel warn"><b>解鎖雲端 vault</b><p class="hint">如果你喺另一部機／換電話，可以下載 '+
+     '<span class="mono">data/vault.enc.json</span> 再喺呢度解鎖。</p>'+
+     '<label class="fld"><span class="lb">vault 檔</span><input type="file" id="f_vault" accept=".json" ></label>'+
+     '<label class="fld"><span class="lb">密碼</span><input type="password" id="f_vpw"></label>'+
+     '<button data-act="unlock">解鎖</button></div>';
+  h+='<div class="panel"><span class="lb">重建示範資料</span><p class="hint">由 data/public.json 重新載入（會覆蓋本機）。</p>'+
+     '<button class="dan" data-act="reseed">由 public.json 重新載入</button></div>';
+  $("app").innerHTML=h;
+  S.view="settings";
+  $("f_import").addEventListener("change",doImport);
+}
+
+function doImport(e){
+  var f=e.target.files[0]; if(!f) return;
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{
+      var d=JSON.parse(fr.result);
+      if(!d.items) throw new Error("格式唔對：缺 items");
+      if(!confirm("匯入 "+d.items.length+" 件，會覆蓋本機現有 "+S.db.items.length+" 件。確定？")) return;
+      S.db=d; if(!S.db.meta) S.db.meta={version:1,updated:today(),densities:[]};
+      saveLocal(); renderTop(); renderList(); toast("已匯入 "+d.items.length+" 件");
+    }catch(err){ toast("匯入失敗："+err.message); }
+  };
+  fr.readAsText(f);
+}
+
+function backup(){
+  var blob=new Blob([JSON.stringify(S.db,null,1)],{type:"application/json"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="collection-backup-"+today()+".json";
+  a.click();
+  toast("已下載備份（記得放去安全地方）",4000);
+}
+
+/* ---------- 主選單事件 ---------- */
+document.addEventListener("click",function(e){
+  var el=e.target.closest("[data-act]");
+  if(!el) return;
+  var a=el.getAttribute("data-act");
+  if(a==="add"){ curPhotos=[]; openEdit(null); }
+  else if(a==="cancel"){ S.view="list"; renderTop(); renderList(); }
+  else if(a==="save"){ doSave(); }
+  else if(a==="del"){
+    if(!confirm("確定刪除？呢個動作唔可以還原。")) return;
+    S.db.items=S.db.items.filter(function(x){return x.id!==S.editId;});
+    S.db.meta.updated=today(); saveLocal(); S.view="list"; renderTop(); renderList();
+    toast("已刪除");
+  }
+  else if(a==="pub-preview"){ openPreview(); }
+  else if(a==="publish"){ openPublish(); }
+  else if(a==="do-publish"){ doPublishClick(); }
+  else if(a==="save-tok"){
+    var t=$("f_tok").value.trim();
+    if(!t){ toast("請貼上 token"); return; }
+    localStorage.setItem(LS_TOK,t);
+    toast("Token 已儲存");
+    gh("/user").then(function(r){
+      if(r.ok){ toast("Token 有效 · "+r.data.login,4000); openPublish(); }
+      else { localStorage.removeItem(LS_TOK); toast("Token 無效 ("+r.status+")",4000); openPublish(); }
+    });
+  }
+  else if(a==="chg-repo"||a==="settings"){ openSettings(); }
+  else if(a==="set-repo"){
+    var rp=$("f_repo").value.trim();
+    if(!/^[\w.-]+\/[\w.-]+$/.test(rp)){ toast("格式要 owner/repo"); return; }
+    localStorage.setItem(LS_REPO,rp); toast("已儲存 "+rp); openSettings();
+  }
+  else if(a==="clear-tok"){ localStorage.removeItem(LS_TOK); toast("已清除 token"); openSettings(); }
+  else if(a==="backup"){ backup(); }
+  else if(a==="wipe"){
+    if(!confirm("清空本機資料？雲端 vault 唔會受影響。")) return;
+    localStorage.removeItem(LS_DB); S.db={meta:{version:1,updated:today(),densities:[]},items:[]};
+    saveLocal(); renderTop(); renderList(); toast("已清空");
+  }
+  else if(a==="reseed"){ if(confirm("由 public.json 重新載入？")) seed(true); }
+  else if(a==="unlock"){
+    var f=$("f_vault").files[0], pw=$("f_vpw").value;
+    if(!f||!pw){ toast("要揀 vault 檔＋輸入密碼"); return; }
+    var fr=new FileReader();
+    fr.onload=function(){
+      try{
+        var blob=JSON.parse(fr.result);
+        decryptVault(pw,blob).then(function(db){
+          S.db=db; saveLocal(); renderTop(); renderList();
+          toast("✅ 解鎖成功 · "+db.items.length+" 件");
+        }).catch(function(){ toast("密碼錯或者檔案損壞"); });
+      }catch(err){ toast("檔案格式錯"); }
+    };
+    fr.readAsText(f);
+  }
+});
+
+/* ---------- 啟動 ---------- */
+function seed(force){
+  var local=force?null:loadLocal();
+  if(local && local.items && local.items.length){
+    S.db=local;
+    if(!S.db.meta) S.db.meta={version:1,updated:today(),densities:[]};
+    finishBoot();
+    return;
+  }
+  Promise.all([
+    fetch("data/public.json",{cache:"no-cache"}).then(function(r){return r.json();}),
+    fetch("data/schema.json",{cache:"no-cache"}).then(function(r){return r.json();}).catch(function(){return null;})
+  ]).then(function(res){
+    var pub=res[0]; S.schema=res[1];
+    S.db={meta:{version:1,updated:(pub.meta&&pub.meta.updated)||today(),
+      densities:(pub.meta&&pub.meta.densities)||[]},items:pub.items||[]};
+    saveLocal();
+    finishBoot();
+  }).catch(function(e){
+    $("app").innerHTML='<div class="panel dan">載入失敗：'+esc(e.message)+
+      '<br><span class="hint">要由 https 或 http 開，唔可以用 file://（瀏覽器限制）。</span></div>';
+  });
+}
+
+function finishBoot(){
+  if(!S.schema){
+    fetch("data/schema.json",{cache:"no-cache"}).then(function(r){return r.json();})
+      .then(function(s){ S.schema=s; renderTop(); renderList(); })
+      .catch(function(){ renderTop(); renderList(); });
+  } else { renderTop(); renderList(); }
+}
+
+seed(false);
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
+}
+})();
+</script>
+</body>
+</html>
