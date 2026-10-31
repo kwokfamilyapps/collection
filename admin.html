@@ -668,8 +668,9 @@ var METALS=[
 function classifyRho(lo,hi){
   function near(a,b){ return Math.abs(a-b)<=(b*0.055); }
   if(lo>=19.0)                       return ["b-replica","密度接近純金 → 唔似流通銀／銅幣"];
-  if(lo>11.6)                        return ["b-replica","密度高過鉛 → 可能鉛質或非金屬（鋅合金假幣常見）"];
-  if(lo<=11.6&&hi>=10.9)             return ["b-replica","密度接近鉛 11.34 → 鉛質私鑄／假幣警號"];
+  if(lo>11.6)                        return ["b-replica","密度高過鉛 11.34 → 可能鉛質或鋅合金假幣"];
+  if(lo>=11.0)                       return ["b-replica","密度接近鉛 11.34 → 鉛質私鑄／假幣警號"];
+  if(lo>10.55)                       return ["b-pending","略高過純銀 10.49 → 厚度可能量薄咗，或者含鉛偏高。用排水法複核體積"];
   if(near((lo+hi)/2,10.23)||(lo>=10.05&&hi<=10.55))
                                      return ["b-genuine","落銀／銀銅合金範圍 ✓（銀幣成色 80–95%）"];
   if(lo>=8.3&&hi<=9.05)              return ["b-genuine","落標準銅合金範圍 ✓（青銅／黃銅／白銅）"];
