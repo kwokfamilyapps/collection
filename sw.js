@@ -1,14 +1,16 @@
 /* 收藏檔案 Service Worker — 離線可用 */
-var CACHE = "momo-coll-v3";
+var CACHE = "momo-coll-v4";
 var SHELL = [
   "./",
   "index.html",
   "admin.html",
   "manifest.webmanifest",
+  "manifest-admin.webmanifest",
   "data/public.json",
   "data/schema.json",
   "icons/icon-192.png",
-  "icons/icon-512.png"
+  "icons/icon-512.png",
+  "icons/apple-touch-icon.png"
 ];
 
 self.addEventListener("install", function (e) {
