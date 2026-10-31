@@ -949,6 +949,47 @@ function publishAll(pw){
   });
 }
 
+/* ---------- 本機 vs 線上 診斷 ---------- */
+function doSyncCheck(){
+  var box=$("syncdiag");
+  if(!box) return;
+  box.innerHTML="檢查中…";
+  var rp=ghRepo().split("/");
+  var url="https://"+rp[0]+".github.io/"+rp[1]+"/data/public.json?cb="+Date.now();
+  fetch(url,{cache:"no-store"}).then(function(r){
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return r.json();
+  }).then(function(live){
+    var liveItems=live.items||[];
+    var livePh=0;
+    liveItems.forEach(function(x){ livePh+=(x.photos||[]).length; });
+    var mine=buildPublic().doc.items;
+    var myPh=0;
+    mine.forEach(function(x){ myPh+=(x.photos||[]).length; });
+    var pendingPhotos=0;
+    (S.db.items||[]).forEach(function(x){
+      (x.photos||[]).forEach(function(p){ if(String(p).indexOf("data:")===0) pendingPhotos++; });
+    });
+    var dirty=S.db.meta.dirty||0;
+    var L=[];
+    L.push("線上公開站： "+liveItems.length+" 件 · "+livePh+" 張相 · 更新 "+((live.meta&&live.meta.updated)||"—"));
+    L.push("本機公開預覽："+mine.length+" 件 · "+myPh+" 張相");
+    if(pendingPhotos) L.push("⚠️ 有 "+pendingPhotos+" 張相片只存喺呢部電話，未上載");
+    if(dirty) L.push("⚠️ 有 "+dirty+" 項改動未發佈");
+    if(mine.length!==liveItems.length) L.push("⚠️ 件數唔同（本機 "+mine.length+" / 線上 "+liveItems.length+"）");
+    if(myPh>livePh) L.push("⚠️ 線上少 "+(myPh-livePh)+" 張相");
+    if(myPh<livePh) L.push("ℹ️ 線上多 "+(livePh-myPh)+" 張相（本機資料可能被重設，可用 vault 還原）");
+    var okAll=(!pendingPhotos&&!dirty&&mine.length===liveItems.length&&myPh===livePh);
+    L.push("");
+    L.push(okAll?"✅ 已完全同步 —— 線上同本機一致"
+                :"❌ 未同步 —— 撳頂部「📤 發佈上線」→ 入密碼 → 等一分鐘");
+    box.innerHTML=L.map(function(x){return esc(x);}).join("<br>");
+  }).catch(function(e){
+    box.innerHTML="檢查失敗："+esc(e.message)+
+      "<br>（網絡問題、repo 名錯，或者 Pages 啱啱發佈仍未生效）";
+  });
+}
+
 /* ---------- 設定 ---------- */
 function openSettings(){
   var it=S.db.items.length;
@@ -976,6 +1017,10 @@ function openSettings(){
   h+='<div class="panel"><span class="lb">Token</span><div class="mono">'+
      (ghToken()?"已設定（" + ghToken().slice(0,10)+"…）":"未設定")+"</div>"+
      '<div class="row" style="margin-top:.4rem"><button class="dan" data-act="clear-tok">清除 token</button></div></div>';
+  h+='<div class="panel"><span class="lb">本機 vs 線上（診斷）</span>'+
+     '<div id="syncdiag" class="mono">未檢查 —— 撳下面個掣，就會對比公開站實際上載咗咩。</div>'+
+     '<button data-act="synccheck" style="margin-top:.5rem">🔍 檢查公開站有冇我最新改動</button>'+
+     '<p class="hint">用嚟分清楚三件事：① 改動只留喺部電話 ② 已上載但 Pages 未重建 ③ 已經完全同步。</p></div>';
   h+='<div class="panel"><span class="lb">本機資料</span><div class="mono">'+it+" 件 · "+
      (JSON.stringify(S.db).length/1024).toFixed(0)+" KB</div>"+
      '<div class="row" style="margin-top:.4rem">'+
@@ -1052,6 +1097,7 @@ document.addEventListener("click",function(e){
   else if(a==="pub-preview"){ openPreview(); }
   else if(a==="publish"){ openPublish(); }
   else if(a==="do-publish"){ doPublishClick(); }
+  else if(a==="synccheck"){ doSyncCheck(); }
   else if(a==="save-tok"){
     var t=$("f_tok").value.trim();
     if(!t){ toast("請貼上 token"); return; }
