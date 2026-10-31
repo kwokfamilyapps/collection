@@ -457,13 +457,16 @@ function renderTop(){
   var pub=it.filter(function(i){return isPublicAuth(i.authenticity);}).length;
   var priv=it.length-pub;
   var pend=it.filter(function(i){return i.authenticity==="pending";}).length;
+  var dirty=S.db.meta.dirty||0;
   $("hdrs").innerHTML=it.length+" 件 · 公開 "+pub+" · 私人 "+priv+" · 待判定 "+pend+
-    " · 更新 "+esc(S.db.meta.updated||"—");
+    " · 更新 "+esc(S.db.meta.updated||"—")+
+    (dirty?' · <b style="color:#8a2b2b">● '+dirty+" 項未發佈</b>":"");
   var tok=ghToken();
   var b='<button class="pri" data-act="add">＋ 新增物件</button>'+
     '<button data-act="newcat">🏷 新分類</button>'+
     '<button data-act="pub-preview">👁 公開預覽</button>'+
-    '<button data-act="publish">📤 發佈上線</button>'+
+    '<button'+(dirty?' class="dan" style="font-weight:700"':'')+' data-act="publish">📤 發佈上線'+
+      (dirty?" · ● "+dirty+" 未發佈":"")+'</button>'+
     '<button data-act="backup">💾 備份</button>'+
     '<button data-act="settings">⚙️ 設定</button>'+
     (tok?'':'<span class="badge b-pending">未設 token</span>');
@@ -767,9 +770,13 @@ function doSave(){
   S.db.meta.updated=today();
   S.db.meta.count=S.db.items.length;
   saveLocal();
+  S.db.meta.dirty=(S.db.meta.dirty||0)+1;
+  saveLocal();
   S.view="list";
   renderTop(); renderList();
-  toast(isPublicAuth(it.authenticity)?"已儲存 · 會公開":"已儲存 · 🔒 只存私人庫");
+  toast(isPublicAuth(it.authenticity)
+    ? "已儲存（本機）· 要按「📤 發佈上線」才上公開站"
+    : "已儲存（本機）· 🔒 只存私人庫，永不會公開", 4500);
 }
 
 function openPreview(){
@@ -820,6 +827,9 @@ function openPublish(){
       '<button class="pri" data-act="save-tok">儲存 token</button></div>';
   } else {
     var r=buildPublic();
+    var dirty=S.db.meta.dirty||0;
+    if(dirty) h+='<div class="panel warn"><b>● 你有 '+dirty+' 項本機改動未上線</b><br>'+
+      '<span class="sub">今次發佈會一次過同步上去（相片、公開資料、分類、加密備份）。</span></div>';
     h+='<div class="panel ok"><b>將會上載：</b><br>'+
       "· <span class='mono'>data/public.json</span> — "+r.doc.items.length+" 件公開<br>"+
       "· <span class='mono'>data/schema.json</span> — "+S.cats.length+" 個分類（含自訂分類）<br>"+
@@ -861,7 +871,11 @@ function publishAll(pw){
       var m=p.match(/^data:image\/(\w+);base64,(.*)$/);
       if(!m) return;
       var ext=m[1]==="jpeg"?"jpg":m[1];
-      var safe=(it.id+"-"+(i+1)+"."+ext).replace(/[^A-Za-z0-9._-]/g,"");
+      /* 內容 hash 入檔名：換相就一定換名，避免 CDN／瀏覽器餵舊圖 */
+      var bstr=String(m[2]||""), hv=0;
+      for(var hi=0;hi<bstr.length;hi+=97) hv=((hv<<5)-hv+bstr.charCodeAt(hi))|0;
+      var hsh=Math.abs(hv).toString(36).slice(0,6)||"x";
+      var safe=(it.id+"-"+(i+1)+"-"+hsh+"."+ext).replace(/[^A-Za-z0-9._-]/g,"");
       if(seen[safe]) return;
       seen[safe]=1;
       jobs.push({item:it,idx:i,name:safe,b64:m[2]});
@@ -916,12 +930,15 @@ function publishAll(pw){
       if(!res.ok) throw new Error("vault 上載失敗 ("+res.status+") "+(res.data.message||""));
     });
   }).then(function(){
+    S.db.meta.dirty=0;
     saveLocal();
     S.view="done";
     var h='<h2>✅ 發佈完成</h2>';
-    h+='<div class="panel ok"><b>已上載</b><br>相片 '+uploaded+' 張 · public.json · vault.enc.json</div>';
+    h+='<div class="panel ok"><b>已上載</b><br>相片 '+uploaded+' 張 · public.json · schema.json · vault.enc.json</div>';
+    h+='<div class="panel warn"><b>⏳ GitHub Pages 要 30–60 秒重建</b><br>'+
+      '<span class="sub">呢段時間開公開目錄仍然會見到舊內容，屬正常。等一分鐘再撳下面個掣。</span></div>';
     h+='<div class="panel"><span class="lb">過程</span><div class="mono">'+esc(log.slice(-8).join("\n"))+"</div></div>";
-    h+='<a class="btn pri" href="index.html" style="margin-top:.6rem">睇公開目錄 →</a>';
+    h+='<a class="btn pri" href="index.html?v='+Date.now()+'" style="margin-top:.6rem">睇公開目錄 →</a>';
     $("app").innerHTML=h;
     toast("發佈完成");
     renderTop();
