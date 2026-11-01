@@ -1282,19 +1282,44 @@ function mergeItems(payload,opts){
   }
   return {n:n,skipped:skipped};
 }
+function authUpgrade(pub){
+  /* 公開站已標「真品」而本機仲係「待確認」→ 跟隨升級（只升 pending→genuine，唔會降級、唔會碰其他欄位） */
+  var n=0, list=(pub&&pub.items)||[];
+  list.forEach(function(inc){
+    if(!inc||inc.authenticity!=="genuine") return;
+    for(var i=0;i<S.db.items.length;i++){
+      var l=S.db.items[i];
+      if(l.id===inc.id && l.authenticity==="pending"){ l.authenticity="genuine"; n++; break; }
+    }
+  });
+  if(n){ S.db.meta.updated=today(); saveLocal(); renderTop(); renderList(); }
+  return n;
+}
 function pullMissing(interactive){
   return fetch("data/public.json?cb="+Date.now(),{cache:"no-store"})
     .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
     .then(function(pub){
       var res=mergeItems({items:(pub&&pub.items)||[]},{overwrite:false,fillEmpty:true,dirty:false});
-      if(interactive) toast(res.n?("✅ 由公開站補回 "+res.n+" 件"):"公開站冇新藏品（本機已齊）",6000);
+      var up=authUpgrade(pub);
+      res.up=up;
+      if(interactive){
+        if(res.n||up) toast("✅ 由公開站補回 "+res.n+" 件"+(up?("；"+up+" 件確認為真品"):""),6000);
+        else toast("公開站冇新藏品（本機已齊）",6000);
+      }
       return res;
     })
     .catch(function(e){ if(interactive) toast("讀公開站失敗："+e.message,5000); return {n:0,err:e.message}; });
 }
 function autoPull(){
-  /* 靜默補回：公開站有、本機冇嘅藏品（唔覆蓋本機改動；刪過嘅 id 有墓碑唔會復活） */
-  pullMissing(false).then(function(r){ if(r&&r.n) toast("🔄 由公開站補回 "+r.n+" 件新藏品",5000); });
+  /* 靜默補回：公開站有、本機冇嘅藏品（唔覆蓋本機改動；刪過嘅 id 有墓碑唔會復活）
+     另外：公開站標咗「真品」而本機仲係「待確認」→ 自動跟隨升級 */
+  pullMissing(false).then(function(r){
+    if(!r) return;
+    var msg="";
+    if(r.n) msg+="🔄 由公開站補回 "+r.n+" 件新藏品";
+    if(r.up) msg+=(msg?"；":"🔄 ")+r.up+" 件已確認為真品";
+    if(msg) toast(msg,5000);
+  });
 }
 function decodeB64Utf8(s){
   s=s.replace(/-/g,"+").replace(/_/g,"/");
