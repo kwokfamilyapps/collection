@@ -1289,7 +1289,12 @@ function authUpgrade(pub){
     if(!inc||inc.authenticity!=="genuine") return;
     for(var i=0;i<S.db.items.length;i++){
       var l=S.db.items[i];
-      if(l.id===inc.id && l.authenticity==="pending"){ l.authenticity="genuine"; n++; break; }
+      if(l.id===inc.id && l.authenticity==="pending"){
+        l.authenticity="genuine";
+        /* 等級描述如果仲寫住「待確認」，一齊同步公開站版本 */
+        if(!l.grade || String(l.grade).indexOf("待確認")>=0) l.grade=inc.grade||l.grade;
+        n++; break;
+      }
     }
   });
   if(n){ S.db.meta.updated=today(); saveLocal(); renderTop(); renderList(); }
