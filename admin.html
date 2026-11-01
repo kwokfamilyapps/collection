@@ -248,6 +248,43 @@ function itemCountOf(catKey){
   return (S.db.items||[]).filter(function(i){return i.category===catKey;}).length;
 }
 
+/* ---------- 退出對話框（iPhone 冇 confirm()，全部自製） ---------- */
+function openExitDialog(){
+  var div=document.createElement("div");
+  div.id="exitmodal";
+  div.style.cssText="position:fixed;inset:0;z-index:130;background:rgba(26,26,22,.6);"+
+    "display:flex;align-items:center;justify-content:center;padding:1rem .7rem";
+  var hasTok=!!ghToken();
+  var n=(S.db.items||[]).length;
+  var dirty=S.db.meta.dirty||0;
+  div.innerHTML='<div style="background:#f0e8d8;border-radius:.6rem;max-width:22rem;width:100%;'+
+    'padding:1rem .85rem">'+
+    '<h2 style="margin-top:0">⏻ 退出管理台</h2>'+
+    '<p class="sub" style="margin-bottom:.6rem">本機有 <b>'+n+'</b> 件資料（只存喺呢部機）。'+
+      (dirty?' <b style="color:#8a2b2b">● '+dirty+' 項未發佈</b>':'')+
+      '<br>Token：'+(hasTok?"已設定":"未設定")+'</p>'+
+    '<div class="row" style="flex-direction:column;align-items:stretch;gap:.45rem;margin:0">'+
+      (dirty?'<p class="sub" style="color:#8a2b2b;margin:0 0 .3rem">⚠️ 有未發佈改動，離開前最好先「📤 發佈上線」，否則只留喺本機。</p>':'')+
+      '<button type="button" style="width:100%" data-ex="leave">🚪 離開管理台（返回公開目錄）</button>'+
+      (hasTok?'<button type="button" class="dan" style="width:100%" data-ex="logout">🔓 登出並清除 token</button>':'')+
+      '<button type="button" class="pri" style="width:100%" data-ex="cancel">取消</button>'+
+    '</div></div>';
+  document.body.appendChild(div);
+  function close(){ if(div.parentNode) div.parentNode.removeChild(div); }
+  div.addEventListener("click",function(e){
+    var b=e.target.closest("[data-ex]");
+    if(!b){ if(e.target===div) close(); return; }
+    var x=b.getAttribute("data-ex");
+    if(x==="cancel") close();
+    else if(x==="leave"){ location.href="index.html"; }
+    else if(x==="logout"){
+      localStorage.removeItem(LS_TOK);
+      close(); toast("已登出 · token 已清除",4000);
+      openSettings();
+    }
+  });
+}
+
 /* ---------- 新增分類對話框（iPhone 冇 prompt()，全部自製） ---------- */
 function openNewCatDialog(cb){
   var div=document.createElement("div");
@@ -469,6 +506,7 @@ function renderTop(){
       (dirty?" · ● "+dirty+" 未發佈":"")+'</button>'+
     '<button data-act="backup">💾 備份</button>'+
     '<button data-act="settings">⚙️ 設定</button>'+
+    '<button class="dan" data-act="exit">⏻ 退出</button>'+
     (tok?'':'<span class="badge b-pending">未設 token</span>');
   $("topbar").innerHTML=b;
 }
@@ -1144,6 +1182,7 @@ document.addEventListener("click",function(e){
     localStorage.setItem(LS_REPO,rp); toast("已儲存 "+rp); openSettings();
   }
   else if(a==="clear-tok"){ localStorage.removeItem(LS_TOK); toast("已清除 token"); openSettings(); }
+  else if(a==="exit"){ openExitDialog(); }
   else if(a==="backup"){ backup(); }
   else if(a==="pullmissing"){ pullMissing(true); }
   else if(a==="addone"){ openSingleImport(); }
