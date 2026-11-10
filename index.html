@@ -84,7 +84,11 @@ input[type=search]:focus,select:focus{outline:.12rem solid #7a8b56;outline-offse
 .th{padding:0;border:.1rem solid #c9b992;border-radius:.4rem;background:#e6dcc4;
     flex:0 0 auto;width:4.6rem;height:4.6rem;overflow:hidden;cursor:pointer}
 .th img{width:100%;height:100%;object-fit:cover;display:block}
+.th{position:relative}
 .th.on{border-color:#a98c4e;box-shadow:0 0 0 .1rem #a98c4e}
+.th .side{position:absolute;left:.1rem;top:.1rem;background:rgba(26,26,22,.76);color:#f6efdd;
+  font-size:.5rem;line-height:1.7;padding:0 .24rem;border-radius:.18rem;font-weight:400}
+.heroside{font-size:.72rem;line-height:1.7;color:#6b5f45;margin:.3rem 0 0}
 .card .bd{padding:.5rem .55rem .6rem}
 .card .nm{font-family:Georgia,serif;font-size:.95rem;line-height:1.35;font-weight:600;
           display:block;margin-bottom:.15rem}
@@ -268,12 +272,20 @@ function renderItem(id){
   if(!it){location.hash="";return;}
 
   var h='<span class="back" onclick="location.hash=\'\'">← 返回目錄</span>';
+  var SIDES=(it.photo_sides||[]);
+  function sideOf(i){ return String(SIDES[i]==null?"":SIDES[i]).trim(); }
+  function capOf(i,n){ var s=sideOf(i); return (s?s+" · ":"")+"相片 "+(i+1)+"／"+n; }
+  /* 只有一張相時唔需要「1／1」 */
+  var capShort=function(i,n){ var s=sideOf(i); if(n<2) return s||"相片 1"; return capOf(i,n); };
   if(it.photos&&it.photos[0]){
     h+='<img class="hero" id="hero" src="photos/'+esc(it.photos[0])+'" alt="'+esc(it.name)+'">';
+    h+='<div class="heroside" id="heroside">'+esc(capShort(0,it.photos.length))+'</div>';
     if(it.photos.length>1){
       h+='<div class="thumbs">'+it.photos.map(function(p,i){
-        return '<button class="th'+(i===0?" on":"")+'" data-p="'+esc(p)+'" aria-label="相片 '+(i+1)+'">'+
-          '<img src="photos/'+esc(p)+'" alt=""></button>';
+        var s=sideOf(i);
+        return '<button class="th'+(i===0?" on":"")+'" data-p="'+esc(p)+'" data-i="'+i+'" aria-label="'+esc(s||("相片 "+(i+1)))+'">'+
+          '<img src="photos/'+esc(p)+'" alt="">'+
+          '<b class="side">'+esc(s?s.slice(0,2):String(i+1))+'</b></button>';
       }).join("")+"</div>";
     }
   }
@@ -347,6 +359,9 @@ function renderItem(id){
     b.addEventListener("click",function(){
       var p=this.getAttribute("data-p");
       if(heroEl) heroEl.src="photos/"+p;
+      var hi=parseInt(this.getAttribute("data-i")||"0",10);
+      var hc=document.getElementById("heroside");
+      if(hc) hc.textContent=capShort(hi,(it.photos||[]).length);
       Array.prototype.forEach.call(document.querySelectorAll(".th"),function(x){x.classList.remove("on");});
       this.classList.add("on");
     });

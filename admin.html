@@ -73,6 +73,9 @@ img.pv{width:100%;max-height:11rem;object-fit:contain;background:#e6dcc4;border-
 .thumbs .x{position:absolute;top:-.3rem;right:-.3rem;width:1.3rem;height:1.3rem;border-radius:50%;
   background:#b04a4a;color:#fff;font-size:.85rem;line-height:1.3rem;text-align:center;cursor:pointer;
   border:none;padding:0}
+.thumbs .sd{position:absolute;left:-.1rem;bottom:-.1rem;background:rgba(47,58,36,.92);color:#fdf9ee;
+  font-size:.52rem;line-height:1.7;padding:0 .28rem;border-radius:.3rem;border:none;cursor:pointer;
+  font-family:inherit;max-width:4.4rem;overflow:hidden;white-space:nowrap}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:.1rem .6rem}
 .kv .k{font-size:.76rem;color:#6b5f45}
 .kv .v{font-size:.88rem;font-weight:600}
@@ -112,7 +115,7 @@ var API="https://api.github.com";
 var ITER=310000;
 
 var PUBLIC_FIELDS=["id","category","name","name_en","era","year","issuer","authenticity",
-  "grade","spec","derived","photos","notes_public","history","varieties","market",
+  "grade","spec","derived","photos","photo_sides","notes_public","history","varieties","market",
   "checklist","tags","sources","updated"];
 var PRIVATE_FIELDS=["notes_private","purchase_price","acquired_from","location",
   "serial_no","valuation_private"];
@@ -551,6 +554,7 @@ function openEdit(id){
   if(!it) it={id:uid(),category:"coin",name:"",authenticity:"pending",spec:{},photos:[],
     history:[],varieties:[],market:[],checklist:[],tags:[],sources:[],updated:today()};
   curPhotos=(it.photos||[]).slice();
+  curSides=(it.photo_sides||[]).slice();
   renderEdit(it);
 }
 
@@ -680,6 +684,8 @@ function renderEdit(it){
 
 /* 目前編輯中嘅相片（base64 data URL 或檔名） */
 var curPhotos=[];
+/* 每張相嘅標示（正面／反面／側面）— 同 curPhotos 一一對應 */
+var curSides=[];
 
 function updAuthHint(){
   var v=$("f_auth")?$("f_auth").value:"pending";
@@ -746,11 +752,25 @@ function updDensity(){
 function renderThumbs(){
   var t=$("thumbs"); if(!t) return;
   t.innerHTML="";
+  while(curSides.length<curPhotos.length) curSides.push("");
+  curSides.length=curPhotos.length;
   curPhotos.forEach(function(p,i){
     var src=(p.indexOf("data:")===0)?p:"photos/"+p;
     var d=document.createElement("div"); d.className="t";
-    d.innerHTML='<img src="'+esc(src)+'" alt=""><button class="x" type="button">×</button>';
-    d.querySelector(".x").addEventListener("click",function(){ curPhotos.splice(i,1); renderThumbs(); });
+    var lb=curSides[i]||"";
+    d.innerHTML='<img src="'+esc(src)+'" alt="">'+
+      '<button class="sd" type="button" title="撳一下轉換：正面 → 反面 → 側面 → 無標示">'+
+        esc(lb||("相片"+(i+1)))+'</button>'+
+      '<button class="x" type="button">×</button>';
+    d.querySelector(".x").addEventListener("click",function(){
+      curPhotos.splice(i,1); curSides.splice(i,1); renderThumbs();
+    });
+    d.querySelector(".sd").addEventListener("click",function(){
+      var order=["正面","反面","側面",""];
+      var at=order.indexOf(curSides[i]||"");
+      curSides[i]=order[(at+1)%order.length];
+      renderThumbs();
+    });
     t.appendChild(d);
   });
   if(!curPhotos.length) t.innerHTML='<span class="sub">未有相片</span>';
@@ -764,6 +784,7 @@ function onPhotos(e){
   files.forEach(function(f){
     chain=chain.then(function(){
       return resizeImage(f,1600).then(function(r){
+        curSides.push(curPhotos.length===0?"正面":(curPhotos.length===1?"反面":""));
         curPhotos.push(r.dataUrl);
         renderThumbs();
       }).catch(function(err){ toast("相片失敗："+err.message); });
@@ -793,6 +814,7 @@ function collectItem(keepId){
     grade:"",
     spec:spec,
     photos:curPhotos.slice(),
+    photo_sides:curSides.slice(0,curPhotos.length),
     notes_public:$("f_notes_public").value.trim(),
     notes_private:$("f_notes_private").value.trim(),
     purchase_price:$("f_price").value.trim(),
@@ -1239,6 +1261,8 @@ function isBlankVal(v){
 function fillEmptyKeys(tgt,inc){
   var changed=false;
   Object.keys(inc).forEach(function(k){
+    /* photos / photo_sides 由 unionPhotos() 逐張對齊處理，唔可以整份覆寫（會出現相片同標示長度唔一致） */
+    if(k==="photos"||k==="photo_sides") return;
     if(isBlankVal(inc[k])) return;
     if(k==="spec"||k==="derived"){
       if(isBlankVal(tgt[k])){ tgt[k]=inc[k]; changed=true; return; }
@@ -1251,6 +1275,30 @@ function fillEmptyKeys(tgt,inc){
       return;
     }
     if(isBlankVal(tgt[k])){ tgt[k]=inc[k]; changed=true; }
+  });
+  return changed;
+}
+function unionPhotos(tgt,inc){
+  /* 公開站新增嘅相片／正反標示 → 補回本機（唔覆蓋本機已有嘅相，只 append 未見過嘅檔名） */
+  var changed=false;
+  if(!inc||!inc.photos||!inc.photos.length) return false;
+  if(!tgt.photos) tgt.photos=[];
+  if(!tgt.photo_sides) tgt.photo_sides=[];
+  while(tgt.photo_sides.length<tgt.photos.length) tgt.photo_sides.push("");
+  tgt.photo_sides.length=tgt.photos.length;   /* 一定要同 photos 等長，否則相片同標示會錯位 */
+  inc.photos.forEach(function(p,i){
+    if(!p) return;
+    var want=(inc.photo_sides&&inc.photo_sides[i])||"";
+    var at=tgt.photos.indexOf(p);
+    if(at<0){
+      at=tgt.photos.length;
+      tgt.photos.push(p);
+      tgt.photo_sides[at]=want;   /* 用 index 指定，唔用 push（避免長度唔一致） */
+      changed=true;
+    } else if(want && !tgt.photo_sides[at]){
+      tgt.photo_sides[at]=want;
+      changed=true;
+    }
   });
   return changed;
 }
@@ -1269,7 +1317,11 @@ function mergeItems(payload,opts){
     for(i=0;i<S.db.items.length;i++){ if(S.db.items[i].id===inc.id){ idx=i; break; } }
     if(idx>=0){
       if(opts.overwrite){ S.db.items[idx]=inc; n++; }
-      else if(opts.fillEmpty && fillEmptyKeys(S.db.items[idx],inc)) n++;
+      else if(opts.fillEmpty){
+        var ch=fillEmptyKeys(S.db.items[idx],inc);
+        if(unionPhotos(S.db.items[idx],inc)) ch=true;
+        if(ch) n++;
+      }
       return;
     }
     S.db.items.push(inc); n++;
