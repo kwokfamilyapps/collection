@@ -1385,8 +1385,42 @@ function decodeB64Utf8(s){
   for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
   return new TextDecoder().decode(bytes);
 }
+function purgeCategory(cat){
+  var victims=[];
+  for(var i=0;i<S.db.items.length;i++) if(S.db.items[i].category===cat) victims.push(S.db.items[i]);
+  var old=document.getElementById("purgeWrap"); if(old) old.remove();
+  var d=document.createElement("div");
+  d.id="purgeWrap";
+  d.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:flex-end;overflow:auto";
+  d.innerHTML='<div style="background:#fff;width:100%;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px">'
+    +'<b style="font-size:20px">🗑 清空「'+esc(cat)+'」分類（本機）</b>'
+    +'<p style="font-size:16px;margin:8px 0;color:#333">本機呢個分類有 <b>'+victims.length+'</b> 件：<br>'
+    + (victims.length? esc(victims.map(function(v){return v.name||v.id;}).join("、")) : "（冇）")
+    +'</p><p style="font-size:15px;color:#a33;margin:8px 0">只影響你部電話嘅本機資料，<b>唔會</b>刪相片檔、<b>唔會</b>即刻影響公開站。清空後要撳「📤 發佈上線」公開站才會跟住變。列入墓碑，唔會被自動補回。</p>'
+    +'<div class="row" style="margin-top:10px">'
+    +'<button id="pgCancel" style="flex:1 1 6rem">取消</button>'
+    +'<button id="pgOk" style="flex:1 1 6rem;background:#a33;color:#fff">確定清空</button></div></div>';
+  document.body.appendChild(d);
+  d.querySelector("#pgCancel").addEventListener("click",function(){ d.remove(); });
+  d.querySelector("#pgOk").addEventListener("click",function(){
+    var ids=victims.map(function(v){return v.id;});
+    S.db.items=S.db.items.filter(function(it){return it.category!==cat;});
+    if(!S.db.meta) S.db.meta={version:1};
+    if(!S.db.meta.deleted_ids) S.db.meta.deleted_ids=[];
+    for(var i=0;i<ids.length;i++) if(S.db.meta.deleted_ids.indexOf(ids[i])<0) S.db.meta.deleted_ids.push(ids[i]);
+    saveLocal(); d.remove(); renderTop(); renderList();
+    toast("✅ 本機已清空「"+cat+"」"+ids.length+" 件 · 記得撳 📤 發佈上線同步公開站",9000);
+  });
+}
 function tryUrlParams(){
   var q=location.search||"";
+  var mP=q.match(/[?&]purge=([^&]+)/);
+  if(mP){
+    var cat=decodeURIComponent(mP[1]);
+    try{ history.replaceState(null,"",location.pathname+location.hash); }catch(e){}
+    purgeCategory(cat);
+    return;
+  }
   var mA=q.match(/[?&](?:add|additem)=([^&]+)/);
   if(mA){
     try{
