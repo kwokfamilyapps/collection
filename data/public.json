@@ -383,10 +383,12 @@
     "mint": ""
    },
    "photos": [
-    "coin-d4-1-5c94c0.webp"
+    "coin-d4-1-5c94c0.webp",
+    "coin-d4-2-dc290d.webp"
    ],
    "photo_sides": [
-    "正面"
+    "正面",
+    "反面"
    ],
    "notes_public": "第 4 枚 · 已收第 1 張相。錢文待收藏者確認（AI 唔會自行讀錢文落名）。規格為收藏者實測：23.1 mm / 3.5 g / 1.0 mm / 微磁吸。",
    "history": [],
