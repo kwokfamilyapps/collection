@@ -4,7 +4,7 @@
   "schema": "momo-collection/v1",
   "owner": "Vernon Kwok",
   "updated": "2026-11-11",
-  "count": 7,
+  "count": 8,
   "note": "只包含公開物品（真品 / 待確認）。仿真、假貨只存私人庫，永不在此檔出現。",
   "densities": [
    {
@@ -693,6 +693,37 @@
    "year": "958 年（交泰元年七月）",
    "issuer": "南唐元宗 李璟（中主）",
    "grade": "普品 · 待評（直徑偏細、偏厚，需上手核）"
+  },
+  {
+   "id": "coin-007",
+   "category": "coin",
+   "name": "待確認 -3",
+   "authenticity": "pending",
+   "era": "待確認",
+   "spec": {
+    "diameter_mm": 22.0,
+    "weight_g": 3.4,
+    "thickness_mm": 1.05,
+    "hole_mm": null,
+    "magnetic": "被磁吸（比之前幾枚強）",
+    "inscription": "待確認",
+    "dynasty": "待確認",
+    "mint": ""
+   },
+   "photos": [
+    "coin-d7-1-b742e5.webp"
+   ],
+   "photo_sides": [
+    "正面"
+   ],
+   "notes_public": "第 7 枚 · 已收第 1 張相。錢文待確認（相片只可靠讀到左「寶」右「元」，上下兩字待近拍）。規格為收藏者實測：22 mm / 3.4 g / 厚約 1.0–1.1 mm / 被磁吸。",
+   "history": [],
+   "varieties": [],
+   "market": [],
+   "checklist": [],
+   "tags": [],
+   "sources": [],
+   "updated": "2026-11-11"
   },
   {
    "id": "agarwood-001",
