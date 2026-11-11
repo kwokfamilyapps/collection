@@ -4,7 +4,7 @@
   "schema": "momo-collection/v1",
   "owner": "Vernon Kwok",
   "updated": "2026-11-11",
-  "count": 5,
+  "count": 6,
   "note": "只包含公開物品（真品 / 待確認）。仿真、假貨只存私人庫，永不在此檔出現。",
   "densities": [
    {
@@ -465,6 +465,37 @@
    "year": "621 年（武德四年）始鑄",
    "issuer": "唐高祖 · 歐陽詢制詞並書",
    "grade": "普品 · 待評"
+  },
+  {
+   "id": "coin-005",
+   "category": "coin",
+   "name": "待確認（第 5 枚）",
+   "authenticity": "pending",
+   "era": "待確認",
+   "spec": {
+    "diameter_mm": 21.7,
+    "weight_g": 3.6,
+    "thickness_mm": 1.5,
+    "hole_mm": null,
+    "magnetic": "微磁吸（吊唔住，垂直掉下）",
+    "inscription": "待確認",
+    "dynasty": "待確認",
+    "mint": ""
+   },
+   "photos": [
+    "coin-d5-1-147c58.webp"
+   ],
+   "photo_sides": [
+    "正面"
+   ],
+   "notes_public": "第 5 枚 · 已收第 1 張相。錢文待收藏者確認（相片系統讀到「端平元寶」，未經確認不寫成事實）。規格為收藏者實測：21.7 mm / 3.6 g / 1.5 mm / 微磁吸。",
+   "history": [],
+   "varieties": [],
+   "market": [],
+   "checklist": [],
+   "tags": [],
+   "sources": [],
+   "updated": "2026-11-11"
   },
   {
    "id": "agarwood-001",
