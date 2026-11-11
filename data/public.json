@@ -4,7 +4,7 @@
   "schema": "momo-collection/v1",
   "owner": "Vernon Kwok",
   "updated": "2026-11-11",
-  "count": 3,
+  "count": 4,
   "note": "只包含公開物品（真品 / 待確認）。仿真、假貨只存私人庫，永不在此檔出現。",
   "densities": [
    {
@@ -307,6 +307,35 @@
     "正面",
     "反面"
    ]
+  },
+  {
+   "id": "coin-003",
+   "category": "coin",
+   "name": "待確認（第 3 枚）",
+   "authenticity": "pending",
+   "era": "待確認",
+   "spec": {
+    "diameter_mm": null,
+    "weight_g": null,
+    "thickness_mm": null,
+    "hole_mm": null,
+    "magnetic": "",
+    "inscription": "待確認",
+    "dynasty": "待確認",
+    "mint": ""
+   },
+   "photos": [
+    "coin-tb-1-57f737.webp"
+   ],
+   "photo_sides": [],
+   "notes_public": "相片辨識建議：日本「天保通寶」（天保年間 1830–1844，橢圓形方孔錢）—— <b>未經收藏者確認，暫列待確認</b>。規格（直徑／重量／厚度）待收藏者量度。",
+   "history": [],
+   "varieties": [],
+   "market": [],
+   "checklist": [],
+   "tags": [],
+   "sources": [],
+   "updated": "2026-11-11"
   },
   {
    "id": "agarwood-001",
