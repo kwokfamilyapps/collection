@@ -4,7 +4,7 @@
   "schema": "momo-collection/v1",
   "owner": "Vernon Kwok",
   "updated": "2026-11-11",
-  "count": 4,
+  "count": 5,
   "note": "只包含公開物品（真品 / 待確認）。仿真、假貨只存私人庫，永不在此檔出現。",
   "densities": [
    {
@@ -365,6 +365,37 @@
    "year": "1835 年（天保六年）起鑄",
    "issuer": "江戶幕府",
    "grade": "普品 · 待評"
+  },
+  {
+   "id": "coin-004",
+   "category": "coin",
+   "name": "待確認（第 4 枚）",
+   "authenticity": "pending",
+   "era": "待確認",
+   "spec": {
+    "diameter_mm": 23.1,
+    "weight_g": 3.5,
+    "thickness_mm": 1.0,
+    "hole_mm": null,
+    "magnetic": "微磁吸（吊唔住，垂直掉下）",
+    "inscription": "待確認",
+    "dynasty": "待確認",
+    "mint": ""
+   },
+   "photos": [
+    "coin-d4-1-5c94c0.webp"
+   ],
+   "photo_sides": [
+    "正面"
+   ],
+   "notes_public": "第 4 枚 · 已收第 1 張相。錢文待收藏者確認（AI 唔會自行讀錢文落名）。規格為收藏者實測：23.1 mm / 3.5 g / 1.0 mm / 微磁吸。",
+   "history": [],
+   "varieties": [],
+   "market": [],
+   "checklist": [],
+   "tags": [],
+   "sources": [],
+   "updated": "2026-11-11"
   },
   {
    "id": "agarwood-001",
